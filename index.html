@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DeciHelp - Decision Assistant</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#111827">
+
+    <style>
+        :root {
+            /* Palet SaaS Modern (Dark Slate / Monochrome) */
+            --primary: #111827; 
+            --primary-hover: #1F2937;
+            --accent: #2563EB; /* Royal Blue */
+            --surface: #FFFFFF;
+            --background: #F9FAFB;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
+            --input-bg: #F3F4F6;
+            --danger: #DC2626;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--background);
+            color: var(--text-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .app-wrapper {
+            max-width: 560px; margin: 0 auto; padding: 32px 20px;
+            min-height: 100vh; display: flex; flex-direction: column; gap: 24px;
+        }
+
+        /* Nav & Header */
+        nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background: var(--primary); }
+        .brand-text { font-size: 1.125rem; font-weight: 700; letter-spacing: -0.03em; color: var(--primary); }
+        
+        .btn-ghost {
+            background: transparent; border: none; color: var(--text-muted); font-weight: 500;
+            font-size: 0.875rem; cursor: pointer; display: inline-flex; align-items: center;
+            gap: 6px; padding: 8px 12px; border-radius: var(--radius-sm); transition: 0.2s;
+        }
+        .btn-ghost:hover { background: var(--border); color: var(--text-main); }
+
+        .page-header h1 { font-size: 1.875rem; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 4px; }
+        .page-header p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* Modern Inputs */
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.875rem; font-weight: 500; color: var(--text-main); margin-bottom: 6px; }
+        
+        input, textarea { 
+            width: 100%; padding: 12px 14px; border: 1px solid transparent;
+            border-radius: var(--radius-md); font-family: inherit; font-size: 0.95rem; 
+            background-color: var(--input-bg); color: var(--text-main); transition: all 0.2s ease;
+        }
+        input::placeholder, textarea::placeholder { color: #9CA3AF; }
+        input:focus, textarea:focus { 
+            outline: none; background-color: var(--surface);
+            border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); 
+        }
+
+        /* Cards */
+        .kategori-card { 
+            background: var(--surface); border: 1px solid var(--border); 
+            padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+            margin-bottom: 16px; position: relative;
+        }
+        .kategori-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+        }
+        .kategori-header h3 { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+
+        /* Buttons */
+        button { 
+            cursor: pointer; font-family: inherit; font-weight: 500; 
+            border-radius: var(--radius-md); border: none; 
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 16px; font-size: 0.95rem; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        button:active { transform: scale(0.97); }
+        
+        .btn-dashed { background: transparent; border: 1px dashed #D1D5DB; color: var(--text-muted); width: 100%; }
+        .btn-dashed:hover { border-color: var(--text-main); color: var(--text-main); }
+        
+        .btn-primary { background: var(--primary); color: white; width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .btn-primary:hover { background: var(--primary-hover); }
+        
+        .btn-outline { background: var(--surface); border: 1px solid var(--border); color: var(--text-main); width: 100%; }
+        .btn-outline:hover { background: var(--background); border-color: #D1D5DB; }
+
+        .btn-danger-text { background: transparent; color: var(--danger); padding: 4px 8px; font-size: 0.875rem; font-weight: 500; }
+        .btn-danger-text:hover { background: #FEF2F2; border-radius: var(--radius-sm); }
+
+        .control-panel { background: var(--surface); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-md); }
+        .action-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-top: 20px; }
+
+        /* Hasil */
+        #hasil-container { display: none; margin-top: 8px; }
+        .hasil-header { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; border-bottom: 2px solid var(--primary); padding-bottom: 8px; display: inline-block;}
+        
+        .hasil-card { 
+            background: var(--surface); border-radius: var(--radius-md); 
+            border: 1px solid var(--border); margin-bottom: 12px; overflow: hidden;
+        }
+        .hasil-badge {
+            background: var(--background); color: var(--text-muted); font-size: 0.75rem; font-weight: 600; 
+            text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 16px; border-bottom: 1px solid var(--border); display: block;
+        }
+        .hasil-item-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px; border-bottom: 1px solid var(--background);
+        }
+        .hasil-item-row:last-child { border-bottom: none; }
+        .hasil-label { font-size: 0.875rem; color: var(--text-muted); }
+        .hasil-value { font-size: 0.95rem; font-weight: 600; color: var(--primary); }
+
+        /* Modal / Dialog */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(17, 24, 39, 0.4); backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: flex-end; z-index: 50;
+            opacity: 0; transition: opacity 0.2s ease-out;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content {
+            background: var(--surface); width: 100%; max-width: 560px; max-height: 85vh;
+            border-radius: 20px 20px 0 0; padding: 24px; overflow-y: auto;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header h2 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+        .btn-close { background: var(--input-bg); color: var(--text-muted); padding: 8px; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+        .btn-close:hover { background: #E5E7EB; color: var(--text-main); }
+        
+        .riwayat-item { border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 12px; transition: border-color 0.2s; }
+        .riwayat-item:hover { border-color: #D1D5DB; }
+        .riwayat-header { padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--surface); border-radius: var(--radius-md); }
+        .riwayat-title-wrap { display: flex; flex-direction: column; gap: 4px; }
+        .riwayat-title { font-weight: 600; font-size: 0.95rem; color: var(--primary); }
+        .riwayat-date { font-size: 0.8rem; color: var(--text-muted); }
+        
+        .riwayat-body { display: none; padding: 0 16px 16px 16px; border-top: 1px solid var(--border); background: var(--surface); border-radius: 0 0 var(--radius-md) var(--radius-md); margin-top: -1px;}
+        .riwayat-item.active .riwayat-body { display: block; border-top-color: transparent;}
+        .riwayat-item.active .riwayat-header { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+        
+        .empty-state { text-align: center; color: var(--text-muted); padding: 48px 0; font-size: 0.95rem; }
+
+        @media (min-width: 600px) {
+            .modal-content { border-radius: var(--radius-lg); align-self: center; max-height: 80vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        <nav>
+            <div class="logo-area">
+                <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div style="display:none; width:32px; height:32px; background:var(--primary); border-radius:8px; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:14px;">D</div>
+                <span class="brand-text">DeciHelp.</span>
+            </div>
+            <button class="btn-ghost" onclick="bukaRiwayat()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                History
+            </button>
+        </nav>
+
+        <header class="page-header">
+            <h1>Decision Assistant</h1>
+            <p>Input your options, and let the system decide.</p>
+        </header>
+        
+        <div id="kategori-list"></div>
+        
+        <button class="btn-dashed" onclick="tambahKategori()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+            Add Category
+        </button>
+
+        <div class="control-panel">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="jumlah">Number of Results</label>
+                <input type="number" id="jumlah" min="1" max="100" value="1" style="background: var(--surface); border: 1px solid var(--border);">
+            </div>
+            
+            <div class="action-grid">
+                <button class="btn-outline" onclick="resetForm()">Reset</button>
+                <button class="btn-primary" onclick="acak()">Generate Result</button>
+            </div>
+        </div>
+
+        <div id="hasil-container">
+            <h2 class="hasil-header">Generated Results</h2>
+            <div id="hasil-output"></div>
+            <button class="btn-outline" onclick="simpanKePerangkat()" style="margin-top: 16px; border-color: var(--primary); color: var(--primary);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Save & Export (.txt)
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalRiwayat" onclick="tutupRiwayat(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>History</h2>
+                <button class="btn-close" onclick="tutupRiwayat(event)">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="riwayat-list"></div>
+            <button class="btn-ghost" style="margin-top: 16px; color: var(--danger); width: 100%; justify-content: center;" onclick="hapusSemuaRiwayat()" id="btnHapusRiwayat">
+                Clear All History
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // PWA Setup
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            });
+        }
+
+        let hasilTerakhirHTML = "";
+        let judulKategoriTerakhir = "";
+
+        function tambahKategori() {
+            const div = document.createElement('div');
+            div.className = 'kategori-card';
+            div.innerHTML = `
+                <div class="kategori-header">
+                    <h3>Category Details</h3>
+                    <button class="btn-danger-text" onclick="this.closest('.kategori-card').remove()">Remove</button>
+                </div>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" placeholder="e.g. Lunch Menu" class="nama">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Options <span style="color:#9CA3AF; font-weight:400;">(One per line)</span></label>
+                    <textarea placeholder="Burger&#10;Pizza&#10;Salad" rows="3" class="opsi"></textarea>
+                </div>
+            `;
+            document.getElementById('kategori-list').appendChild(div);
+        }
+
+        function resetForm() {
+            if(confirm("Clear all data and reset the form?")) {
+                document.getElementById('kategori-list').innerHTML = "";
+                document.getElementById('jumlah').value = "1";
+                document.getElementById('hasil-container').style.display = 'none';
+                tambahKategori();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function acak() {
+            const kategoriEls = document.querySelectorAll('.kategori-card');
+            const inputJumlah = document.getElementById('jumlah');
+            let jumlah = parseInt(inputJumlah.value);
+            
+            hasilTerakhirHTML = ""; 
+            judulKategoriTerakhir = "";
+
+            if (isNaN(jumlah) || jumlah < 1) return alert("Please enter a valid number (minimum 1).");
+            if (jumlah > 100) { jumlah = 100; inputJumlah.value = 100; }
+            if (kategoriEls.length === 0) return alert("Please add at least one category.");
+
+            let adaYangKosong = false;
+            let listNamaKategori = [];
+
+            kategoriEls.forEach((el, index) => {
+                const opsiArr = el.querySelector('.opsi').value.split('\n').map(o => o.trim()).filter(o => o);
+                if (opsiArr.length === 0) adaYangKosong = true;
+                const namaInput = el.querySelector('.nama').value.trim();
+                listNamaKategori.push(namaInput || `Category ${index + 1}`);
+            });
+
+            if (adaYangKosong) return alert("Please fill in the options for all categories.");
+
+            judulKategoriTerakhir = listNamaKategori.join(", ");
+
+            for (let i = 1; i <= jumlah; i++) {
+                let rowsHTML = "";
+                kategoriEls.forEach((el, index) => {
+                    const nama = listNamaKategori[index];
+                    const opsiArr = el.querySelector('.opsi').value.split('\n').map(o => o.trim()).filter(o => o);
+                    const terpilih = opsiArr[Math.floor(Math.random() * opsiArr.length)];
+                    
+                    rowsHTML += `
+                        <div class="hasil-item-row">
+                            <span class="hasil-label">${nama}</span>
+                            <span class="hasil-value">${terpilih}</span>
+                        </div>`;
+                });
+                
+                hasilTerakhirHTML += `
+                    <div class="hasil-card">
+                        ${jumlah > 1 ? `<span class="hasil-badge">Result #${i}</span>` : ''}
+                        ${rowsHTML}
+                    </div>`;
+            }
+
+            document.getElementById('hasil-output').innerHTML = hasilTerakhirHTML;
+            document.getElementById('hasil-container').style.display = 'block';
+        }
+
+        function simpanKePerangkat() {
+            if (!hasilTerakhirHTML) return;
+
+            simpanKeRiwayatAplikasi();
+
+            let teksHasil = "=== DECIHELP RESULTS ===\n";
+            teksHasil += "Generated: " + new Date().toLocaleString() + "\n\n";
+            
+            const hasilCards = document.querySelectorAll('.hasil-card');
+            hasilCards.forEach((card) => {
+                const badge = card.querySelector('.hasil-badge');
+                if (badge) teksHasil += `[${badge.innerText}]\n`;
+                
+                const rows = card.querySelectorAll('.hasil-item-row');
+                rows.forEach(row => {
+                    const label = row.querySelector('.hasil-label').innerText;
+                    const value = row.querySelector('.hasil-value').innerText;
+                    teksHasil += `${label}: ${value}\n`;
+                });
+                teksHasil += "\n";
+            });
+
+            const blob = new Blob([teksHasil], { type: "text/plain;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `DeciHelp_Export_${Date.now()}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            const btnExport = document.querySelector('#hasil-container .btn-outline');
+            const teksAsli = btnExport.innerHTML;
+            btnExport.innerHTML = "✅ Export Successful";
+            btnExport.style.borderColor = "var(--text-main)";
+            btnExport.style.color = "var(--text-main)";
+            setTimeout(() => { 
+                btnExport.innerHTML = teksAsli; 
+                btnExport.style.borderColor = "var(--primary)"; 
+                btnExport.style.color = "var(--primary)"; 
+            }, 2500);
+        }
+
+        function simpanKeRiwayatAplikasi() {
+            let riwayat = JSON.parse(localStorage.getItem('decihelp_history')) || [];
+            const now = new Date();
+            const waktuFormat = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+            riwayat.unshift({ judul: judulKategoriTerakhir, tanggal: waktuFormat, html: hasilTerakhirHTML });
+            if (riwayat.length > 30) riwayat.pop();
+            localStorage.setItem('decihelp_history', JSON.stringify(riwayat));
+        }
+
+        function bukaRiwayat() {
+            const modal = document.getElementById('modalRiwayat');
+            const listContainer = document.getElementById('riwayat-list');
+            const btnHapus = document.getElementById('btnHapusRiwayat');
+            
+            let riwayat = JSON.parse(localStorage.getItem('decihelp_history')) || [];
+            listContainer.innerHTML = "";
+
+            if (riwayat.length === 0) {
+                listContainer.innerHTML = `<div class="empty-state">No history found.</div>`;
+                btnHapus.style.display = 'none';
+            } else {
+                btnHapus.style.display = 'flex';
+                riwayat.forEach((item, index) => {
+                    listContainer.innerHTML += `
+                        <div class="riwayat-item" id="accordion-${index}">
+                            <div class="riwayat-header" onclick="toggleAccordion(${index})">
+                                <div class="riwayat-title-wrap">
+                                    <span class="riwayat-title">${item.judul}</span>
+                                    <span class="riwayat-date">${item.tanggal}</span>
+                                </div>
+                                <svg width="16" height="16" fill="none" stroke="#6B7280" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="riwayat-body" style="padding-top:16px;">${item.html}</div>
+                        </div>
+                    `;
+                });
+            }
+            // Add tiny timeout for animation to trigger
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function toggleAccordion(index) { document.getElementById(`accordion-${index}`).classList.toggle('active'); }
+        
+        function tutupRiwayat(event) { 
+            if (event.target.id === 'modalRiwayat' || event.target.closest('.btn-close')) { 
+                const modal = document.getElementById('modalRiwayat');
+                modal.classList.remove('active');
+                setTimeout(() => modal.style.display = 'none', 200); // Wait for transition
+            } 
+        }
+        
+        function hapusSemuaRiwayat() { 
+            if(confirm("Are you sure you want to clear all history? This cannot be undone.")) { 
+                localStorage.removeItem('decihelp_history'); 
+                bukaRiwayat(); 
+            } 
+        }
+
+        // Initialize first category
+        tambahKategori();
+    </script>
+</body>
+</html>
