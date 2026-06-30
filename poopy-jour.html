@@ -720,14 +720,38 @@ function drawDur(recs){
 function drawCond(recs){const e=bFreq(recs,r=>r.conditions).slice(0,8);drawHBar('c-cond',e.map(x=>x[0]),e.map(x=>x[1]),'#A855F7');}
 /* CANVAS */
 function gc(id){
-  const c=document.getElementById(id);if(!c)return null;
-  const H=parseInt(c.getAttribute('height')||155),dpr=window.devicePixelRatio||1;
-  let W=c.offsetWidth||c.parentElement?.offsetWidth||c.clientWidth;
-  if(!W||W<10)W=320;
-  c.style.width=W+'px';c.style.height=H+'px';
-  c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);
-  const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
-  return{ctx,W,H};
+  const c = document.getElementById(id);
+  if (!c) return null;
+
+  // Bersihkan semua ukuran/style sebelumnya
+  c.removeAttribute('width');
+  c.removeAttribute('height');
+  c.style.width = '';
+  c.style.height = '';
+  c.style.display = 'block';
+  c.style.maxWidth = '100%';
+
+  // Ambil lebar parent yang valid
+  const parentW = c.parentElement?.clientWidth;
+  const W = (parentW && parentW > 10) ? parentW : 320;
+  const H = 155; // tinggi standar
+
+  const dpr = window.devicePixelRatio || 1;
+
+  // Set ukuran buffer canvas (piksel sesungguhnya)
+  c.width = Math.round(W * dpr);
+  c.height = Math.round(H * dpr);
+
+  // Set ukuran tampilan (CSS)
+  c.style.width = W + 'px';
+  c.style.height = H + 'px';
+
+  // Siapkan context dan bersihkan area
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  return { ctx, W, H };
 }
 function drawBar(id,lb,dt,col){
   const cv=gc(id);if(!cv)return;const{ctx,W,H}=cv;
