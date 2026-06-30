@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>💩 Poop Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+:root{--bg:#FFF8F0;--surface:#FFFFFF;--s2:#FFF3E8;--pr:#FF6B35;--prl:#FF8C5A;--prd:#E55A25;--sc:#4ECDC4;--scd:#3ABDB4;--ac:#FFD93D;--pu:#A855F7;--gr:#22C55E;--re:#EF4444;--tx:#2D3748;--ts:#718096;--bd:#FFE8D6;--sh:rgba(255,107,53,.12);--r:20px;--rs:12px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--tx);overflow:hidden;}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:430px;margin:0 auto;position:relative;background:var(--bg);overflow:hidden;}
+.screen{display:none;flex-direction:column;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px));}
+.screen.active{display:flex;}
+.screen::-webkit-scrollbar{display:none;}
+.bottom-nav{position:absolute;bottom:0;left:0;right:0;width:100%;background:var(--surface);border-top:2px solid var(--bd);display:flex;z-index:100;box-shadow:0 -4px 20px var(--sh);padding-bottom:env(safe-area-inset-bottom,0px);flex-shrink:0;}
+.nav-btn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 8px;border:none;background:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;color:var(--ts);transition:all .2s;}
+.nav-btn.active{color:var(--pr);}
+.nav-btn svg{width:24px;height:24px;transition:transform .2s;}
+.nav-btn.active svg{transform:scale(1.15);}
+.page-header{padding:52px 20px 12px;display:flex;align-items:center;gap:12px;}
+.page-header h1{font-size:24px;font-weight:900;}
+.card{background:var(--surface);border-radius:var(--r);padding:18px 16px;margin:0 14px 12px;box-shadow:0 2px 12px var(--sh);border:2px solid var(--bd);}
+.card-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.btn{border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn:active{transform:scale(.96);}
+.btn-primary{background:var(--pr);color:#fff;padding:16px 32px;box-shadow:0 4px 0 var(--prd);}
+.btn-primary:active{box-shadow:0 1px 0 var(--prd);transform:translateY(3px);}
+.btn-secondary{background:var(--sc);color:#fff;padding:16px 32px;box-shadow:0 4px 0 var(--scd);}
+.btn-secondary:active{box-shadow:0 1px 0 var(--scd);transform:translateY(3px);}
+.btn-outline{background:transparent;color:var(--pr);border:2px solid var(--pr);padding:12px 24px;}
+.btn-danger{background:var(--re);color:#fff;padding:12px 20px;box-shadow:0 3px 0 #b91c1c;font-size:14px;}
+.btn-ghost{background:var(--s2);color:var(--tx);padding:12px 20px;font-size:14px;border:2px solid var(--bd);}
+.btn-full{width:100%;}
+/* HOME */
+.home-hero{padding:44px 20px 0;text-align:center;}
+.home-greeting{font-size:13px;color:var(--ts);font-weight:700;}
+.home-title{font-size:26px;font-weight:900;margin:2px 0 0;}
+.home-title span{color:var(--pr);}
+.mascot-wrap{margin:10px auto 16px;width:110px;height:110px;cursor:pointer;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.start-btn-wrap{padding:0 14px 6px;}
+.start-btn-wrap .btn-primary{font-size:18px;padding:17px 32px;border-radius:24px;width:100%;position:relative;overflow:hidden;}
+.start-btn-wrap .btn-primary::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:rgba(255,255,255,.15);transform:skewX(-20deg);animation:shimmer 2.5s ease-in-out infinite;}
+@keyframes shimmer{0%{left:-100%}60%,100%{left:150%}}
+.active-banner{margin:0 14px 8px;background:linear-gradient(135deg,var(--pr),var(--prl));border-radius:var(--rs);padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;color:#fff;box-shadow:0 4px 16px rgba(255,107,53,.35);animation:pulb 2s ease-in-out infinite;}
+@keyframes pulb{0%,100%{box-shadow:0 4px 14px rgba(255,107,53,.3)}50%{box-shadow:0 4px 22px rgba(255,107,53,.5)}}
+.ab-time{font-size:24px;font-weight:900;flex:1;}
+.ab-lbl{font-size:11px;font-weight:700;opacity:.85;}
+.today-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-mini{background:var(--s2);border-radius:var(--rs);padding:11px 12px;text-align:center;}
+.stat-mini .val{font-size:20px;font-weight:900;color:var(--pr);line-height:1;}
+.stat-mini .lbl{font-size:11px;font-weight:700;color:var(--ts);margin-top:3px;}
+.weekly-row{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.ws-item{flex:1;text-align:center;}
+.ws-item .wv{font-size:18px;font-weight:900;color:var(--scd);}
+.ws-item .wl{font-size:10px;font-weight:700;color:var(--ts);margin-top:2px;}
+.ws-div{width:1px;height:36px;background:var(--bd);}
+.monthly-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.ms-item{background:var(--s2);border-radius:10px;padding:10px 6px;text-align:center;}
+.ms-item .mv{font-size:17px;font-weight:900;color:var(--pu);}
+.ms-item .ml{font-size:10px;font-weight:700;color:var(--ts);margin-top:2px;}
+.week-bar{display:flex;align-items:flex-end;justify-content:space-between;gap:3px;height:56px;margin-top:6px;}
+.wb-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;}
+.wb-fill{width:100%;border-radius:5px 5px 0 0;background:var(--pr);opacity:.65;min-height:3px;}
+.wb-fill.today{opacity:1;}
+.wb-lbl{font-size:9px;font-weight:700;color:var(--ts);}
+.shortcut-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.shortcut-card{background:var(--surface);border-radius:var(--rs);border:2px solid var(--bd);padding:12px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .15s;box-shadow:0 2px 8px var(--sh);}
+.shortcut-card:active{transform:scale(.96);}
+.sc-icon{font-size:26px;}
+.sc-label{font-size:13px;font-weight:800;}
+.sc-sub{font-size:10px;color:var(--ts);font-weight:600;}
+.insight-card{margin:0 14px 10px;background:linear-gradient(135deg,#FFF3CD,#FFEAA7);border-radius:var(--rs);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;border:2px solid #FFD93D;}
+.ic-icon{font-size:20px;flex-shrink:0;}
+.ic-text{font-size:13px;font-weight:700;color:#92400E;line-height:1.45;}
+/* TIMER */
+#screen-timer{align-items:center;justify-content:center;text-align:center;background:linear-gradient(160deg,#FFF8F0 0%,#FFE8D6 100%);}
+.timer-mascot{width:130px;height:130px;margin-bottom:12px;animation:float 2s ease-in-out infinite;}
+.timer-label{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:8px;}
+.timer-display{font-size:76px;font-weight:900;color:var(--pr);letter-spacing:-3px;line-height:1;margin-bottom:6px;font-variant-numeric:tabular-nums;}
+.timer-start-info{font-size:12px;color:var(--ts);font-weight:600;margin-bottom:40px;}
+.finish-btn-wrap{padding:0 28px;width:100%;}
+.finish-btn-wrap .btn-secondary{width:100%;font-size:20px;padding:18px;border-radius:24px;}
+/* EVAL */
+.eval-header{background:linear-gradient(135deg,var(--pr),var(--prl));color:#fff;padding:52px 20px 20px;text-align:center;}
+.eval-header h2{font-size:21px;font-weight:900;margin-top:6px;}
+.dur-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.25);border-radius:20px;padding:6px 14px;font-size:15px;font-weight:700;margin-top:8px;}
+.section-label{font-size:14px;font-weight:800;color:var(--tx);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.section-note{font-size:11px;font-weight:600;color:var(--ts);}
+.chip-group{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{border:2.5px solid var(--bd);border-radius:20px;padding:7px 13px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:var(--surface);color:var(--tx);transition:all .15s;}
+.chip:active{transform:scale(.93);}
+.chip.selected{background:var(--pr);border-color:var(--pr);color:#fff;}
+.color-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.color-item{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.color-chip{width:40px;height:40px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.color-chip:active{transform:scale(.88);}
+.color-chip.selected{border-color:var(--tx);box-shadow:0 0 0 2px white inset;}
+.color-chip-label{font-size:9px;font-weight:700;color:var(--ts);text-align:center;}
+.slider-labels{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--ts);margin-bottom:8px;}
+input[type=range]{width:100%;-webkit-appearance:none;height:8px;border-radius:4px;background:linear-gradient(to right,var(--pr) 0%,var(--pr) var(--pct,30%),var(--bd) var(--pct,30%),var(--bd) 100%);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--pr);cursor:pointer;border:4px solid #fff;box-shadow:0 2px 8px rgba(255,107,53,.4);}
+.slider-val{text-align:center;font-size:22px;font-weight:900;color:var(--pr);margin-top:8px;}
+textarea.notes-area{width:100%;border:2.5px solid var(--bd);border-radius:var(--rs);padding:12px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:var(--tx);background:var(--surface);resize:none;height:78px;outline:none;transition:border-color .2s;}
+textarea.notes-area:focus{border-color:var(--pr);}
+/* STATS */
+.stats-tabs{display:flex;gap:7px;padding:0 14px 10px;scrollbar-width:none;}
+.stats-tabs::-webkit-scrollbar{display:none;}
+.stats-tab{flex-shrink:0;padding:8px 16px;border-radius:20px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:2px solid var(--bd);background:var(--surface);color:var(--ts);transition:all .15s;}
+.stats-tab.active{background:var(--pr);border-color:var(--pr);color:#fff;}
+.period-card{background:var(--surface);border-radius:var(--r);padding:16px;margin:0px 14px 12px;border:2px solid var(--bd);cursor:pointer;transition:all .15s;box-shadow:0 2px 12px var(--sh);}
+.period-card:active{transform:scale(.98);}
+.pc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.pc-title{font-size:15px;font-weight:900;}
+.pc-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pc-stat{background:var(--s2);border-radius:10px;padding:9px 10px;}
+.pc-stat .pv{font-size:16px;font-weight:900;color:var(--pr);}
+.pc-stat .pl{font-size:10px;font-weight:700;color:var(--ts);margin-top:2px;}
+/* HISTORY */
+.hist-toolbar{display:flex;align-items:center;gap:8px;padding:0 14px 10px;}
+.filter-row{display:flex;overflow-x:auto;gap:7px;flex:1;min-width:0;scrollbar-width:none;}
+.filter-row::-webkit-scrollbar{display:none;}
+.filter-pill{flex-shrink:0;padding:7px 14px;border-radius:20px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--bd);background:var(--surface);color:var(--ts);transition:all .15s;white-space:nowrap;}
+.filter-pill.active{background:var(--pr);border-color:var(--pr);color:#fff;}
+.search-wrap{padding:0 14px 10px;position:relative;}
+.search-input{width:100%;border:2px solid var(--bd);border-radius:var(--rs);padding:10px 14px 10px 38px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;color:var(--tx);background:var(--surface);outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--pr);}
+.search-icon{position:absolute;left:24px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;}
+.adv-toggle-btn{flex-shrink:0;width:38px;height:38px;border-radius:var(--rs);font-family:'Nunito',sans-serif;font-size:15px;cursor:pointer;border:2px solid var(--bd);background:var(--surface);color:var(--ts);display:flex;align-items:center;justify-content:center;gap:0;position:relative;transition:all .15s;}
+.adv-toggle-btn.open{border-color:var(--pr);color:var(--pr);background:var(--s2);}
+.adv-filter-section{margin-bottom:14px;}
+.adv-filter-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ts);margin-bottom:8px;}
+.history-list{padding:0 14px;}
+.history-date-group{margin-bottom:2px;}
+.history-date-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ts);padding:8px 0 5px;}
+.history-item{background:var(--surface);border-radius:var(--rs);padding:12px;margin-bottom:7px;border:2px solid var(--bd);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;box-shadow:0 1px 6px var(--sh);}
+.history-item:active{transform:scale(.98);}
+.hi-dot{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.hi-info{flex:1;min-width:0;}
+.hi-time{font-size:15px;font-weight:800;}
+.hi-dur{font-size:12px;font-weight:600;color:var(--ts);}
+.hi-tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+.hi-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:var(--s2);color:var(--ts);}
+.hi-tag.cond{background:#EDE9FE;color:#6D28D9;}
+.hi-arrow{color:var(--ts);font-size:18px;flex-shrink:0;}
+.empty-state{text-align:center;padding:40px 24px;color:var(--ts);}
+.empty-state .es-icon{font-size:54px;margin-bottom:10px;}
+.empty-state h3{font-size:17px;font-weight:800;color:var(--tx);margin-bottom:6px;}
+.empty-state p{font-size:13px;font-weight:600;line-height:1.5;}
+/* DETAIL */
+.detail-hero{background:linear-gradient(135deg,var(--sc),#2DD4BF);color:#fff;padding:52px 20px 22px;text-align:center;}
+.detail-date{font-size:12px;font-weight:700;opacity:.85;margin-bottom:3px;}
+.detail-time{font-size:26px;font-weight:900;}
+.detail-dur{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.25);border-radius:20px;padding:6px 16px;font-size:15px;font-weight:800;margin-top:8px;}
+.detail-row{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1.5px solid var(--bd);}
+.detail-row:last-child{border-bottom:none;}
+.dr-icon{font-size:18px;width:26px;flex-shrink:0;margin-top:1px;}
+.dr-label{font-size:11px;font-weight:700;color:var(--ts);margin-bottom:2px;}
+.dr-val{font-size:14px;font-weight:700;}
+.diff-bar-bg{height:7px;background:var(--bd);border-radius:4px;overflow:hidden;margin-top:5px;width:140px;}
+.diff-bar-fill{height:100%;border-radius:4px;}
+.detail-actions{display:flex;gap:10px;padding:0 14px 10px;}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border-radius:var(--r) var(--r) 0 0;padding:18px;width:100%;max-width:430px;max-height:80vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.25,.46,.45,.94);}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-handle{width:40px;height:4px;background:var(--bd);border-radius:2px;margin:0 auto 14px;}
+.modal h3{font-size:17px;font-weight:900;margin-bottom:14px;}
+.modal .modal-section{margin-bottom:14px;}
+/* TOAST */
+.toast{position:fixed;bottom:calc(88px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(10px);background:var(--tx);color:#fff;padding:11px 18px;border-radius:var(--rs);font-size:13px;font-weight:700;z-index:300;opacity:0;transition:all .3s;max-width:88vw;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* PERIOD DETAIL */
+.pd-box{background:var(--s2);border-radius:12px;padding:13px;margin-bottom:10px;}
+.pd-box-title{font-weight:800;font-size:13px;margin-bottom:8px;color:var(--ts);}
+.pd-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;}
+.pdc-val{font-size:15px;font-weight:900;}
+.pdc-lbl{font-size:10px;font-weight:700;color:var(--ts);}
+.pd-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd);font-size:13px;font-weight:700;}
+.pd-row:last-child{border-bottom:none;}
+/* CANVAS / CHARTS */
+.card canvas{display:block;width:100%;max-width:100%;}
+</style>
+</head>
+<body>
+<div id="app">
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <div class="home-hero">
+    <div class="home-greeting" id="home-greeting">Selamat pagi! ☀️</div>
+    <div class="home-title">Poop <span>Tracker</span> 💩</div>
+    <div class="mascot-wrap" onclick="goTimer()">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+        <ellipse cx="60" cy="82" rx="36" ry="26" fill="#8B4513"/>
+        <ellipse cx="60" cy="74" rx="28" ry="22" fill="#A0522D"/>
+        <ellipse cx="60" cy="64" rx="20" ry="18" fill="#8B4513"/>
+        <path d="M60 46C60 46 48 40 50 32C52 24 63 22 67 28C71 34 64 40 62 44" fill="#A0522D"/>
+        <ellipse cx="62" cy="28" rx="8" ry="7" fill="#8B4513"/>
+        <ellipse cx="64" cy="24" rx="5" ry="4.5" fill="#A0522D"/>
+        <circle cx="51" cy="68" r="6" fill="white"/><circle cx="69" cy="68" r="6" fill="white"/>
+        <circle cx="53" cy="69" r="3.5" fill="#2D1A0E"/><circle cx="71" cy="69" r="3.5" fill="#2D1A0E"/>
+        <circle cx="54" cy="67.5" r="1.2" fill="white"/><circle cx="72" cy="67.5" r="1.2" fill="white"/>
+        <path d="M50 78Q60 86 70 78" stroke="#2D1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <circle cx="43" cy="74" r="5" fill="#FF9999" opacity="0.45"/>
+        <circle cx="77" cy="74" r="5" fill="#FF9999" opacity="0.45"/>
+        <text x="16" y="42" font-size="12" fill="#FFD93D" opacity="0.9">✨</text>
+        <text x="88" y="40" font-size="10" fill="#FFD93D">⭐</text>
+      </svg>
+    </div>
+  </div>
+  <div id="abw" style="display:none">
+    <div class="active-banner" onclick="goTimer()">
+      <div><div class="ab-lbl">⏱️ Sesi Sedang Berjalan</div><div class="ab-time" id="banner-timer">00:00</div></div>
+      <div style="color:#fff;font-size:13px;font-weight:700;text-align:right">Ketuk untuk<br>melanjutkan →</div>
+    </div>
+  </div>
+  <div class="start-btn-wrap">
+    <button class="btn btn-primary" onclick="startSession()">💩 Start Pooping</button>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div class="card-title">📅 Hari Ini</div>
+    <div class="today-grid">
+      <div class="stat-mini"><div class="val" id="h-count">0</div><div class="lbl">Kali BAB</div></div>
+      <div class="stat-mini"><div class="val" id="h-tdur">—</div><div class="lbl">Total Durasi</div></div>
+      <div class="stat-mini"><div class="val" id="h-ldur">—</div><div class="lbl">Durasi Terakhir</div></div>
+      <div class="stat-mini"><div class="val" id="h-lcond" style="font-size:12px;line-height:1.2">—</div><div class="lbl">Kondisi Terakhir</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 Minggu Ini</div>
+    <div class="weekly-row">
+      <div class="ws-item"><div class="wv" id="ws-cnt">0</div><div class="wl">Total BAB</div></div>
+      <div class="ws-div"></div>
+      <div class="ws-item"><div class="wv" id="ws-avg" style="font-size:14px">—</div><div class="wl">Avg Durasi</div></div>
+      <div class="ws-div"></div>
+      <div class="ws-item"><div class="wv" id="ws-cond" style="font-size:12px">—</div><div class="wl">Sering Terjadi</div></div>
+    </div>
+    <div class="week-bar" id="home-wbar"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🗓️ Bulan Ini</div>
+    <div class="monthly-row">
+      <div class="ms-item"><div class="mv" id="ms-cnt">0</div><div class="ml">Total BAB</div></div>
+      <div class="ms-item"><div class="mv" id="ms-avg" style="font-size:13px">—</div><div class="ml">Avg Durasi</div></div>
+      <div class="ms-item"><div class="mv" id="ms-pd">0</div><div class="ml">Per Hari</div></div>
+    </div>
+  </div>
+  <div id="home-insight" class="insight-card" style="display:none">
+    <div class="ic-icon">💡</div><div class="ic-text" id="home-insight-txt"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🔗 Menu Cepat</div>
+    <div class="shortcut-row">
+      <div class="shortcut-card" onclick="gotoScreen('stats')"><div class="sc-icon">📈</div><div><div class="sc-label">Statistik</div><div class="sc-sub">Grafik & analisis</div></div></div>
+      <div class="shortcut-card" onclick="gotoScreen('history')"><div class="sc-icon">📋</div><div><div class="sc-label">Histori</div><div class="sc-sub">Semua catatan</div></div></div>
+    </div>
+  </div>
+</div>
+<!-- TIMER -->
+<div id="screen-timer" class="screen">
+  <div style="height:40px"></div>
+  <svg class="timer-mascot" viewBox="0 0 140 140" fill="none">
+    <ellipse cx="70" cy="116" rx="42" ry="13" fill="#E8E8F0"/>
+    <rect x="30" y="90" width="80" height="28" rx="8" fill="#F0F0F8"/>
+    <ellipse cx="70" cy="90" rx="40" ry="9" fill="#E0E0EC"/>
+    <ellipse cx="70" cy="90" rx="32" ry="6.5" fill="#C8D8F0"/>
+    <rect x="22" y="80" width="96" height="13" rx="6.5" fill="#E8E8F0"/>
+    <ellipse cx="70" cy="87" rx="18" ry="10" fill="#8B4513"/>
+    <ellipse cx="70" cy="81" rx="13" ry="10" fill="#A0522D"/>
+    <ellipse cx="70" cy="73" rx="9" ry="8" fill="#8B4513"/>
+    <ellipse cx="70" cy="66" rx="5.5" ry="5" fill="#A0522D"/>
+    <circle cx="65" cy="80" r="3" fill="white"/><circle cx="75" cy="80" r="3" fill="white"/>
+    <circle cx="65.8" cy="80.5" r="1.8" fill="#2D1A0E"/><circle cx="75.8" cy="80.5" r="1.8" fill="#2D1A0E"/>
+    <ellipse cx="48" cy="72" rx="4" ry="6" fill="#4ECDC4" opacity="0.6"/>
+    <ellipse cx="48" cy="65" rx="2" ry="3" fill="#4ECDC4" opacity="0.35"/>
+    <ellipse cx="92" cy="70" rx="3.5" ry="5" fill="#4ECDC4" opacity="0.5"/>
+    <path d="M56 60Q58 55 56 50" stroke="#FFD93D" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <path d="M70 56Q72 51 70 46" stroke="#FFD93D" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <path d="M84 58Q86 53 84 48" stroke="#FFD93D" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>
+  </svg>
+  <div class="timer-label">Sedang BAB... 💩</div>
+  <div class="timer-display"><span id="t-mm">00</span>:<span id="t-ss">00</span></div>
+  <div class="timer-start-info" id="t-start-info">Mulai: —</div>
+  <div class="finish-btn-wrap">
+    <button class="btn btn-secondary" onclick="finishSession()">✅ Finish</button>
+  </div>
+</div>
+<!-- EVAL -->
+<div id="screen-eval" class="screen">
+  <div class="eval-header">
+    <div style="font-size:18px">🎉 Selesai! Luar biasa</div>
+    <h2>Bagaimana BAB kamu?</h2>
+    <div class="dur-badge" id="eval-dur-badge">⏱️ —</div>
+  </div>
+  <div class="card">
+    <div class="section-label">💧 Komposisi Feses <span class="section-note">(boleh lebih dari satu)</span></div>
+    <div class="chip-group" id="eval-comp">
+      <div class="chip" data-val="Sangat Padat" onclick="toggleChip(this)">🪨 Sangat Padat</div>
+      <div class="chip" data-val="Padat" onclick="toggleChip(this)">⬛ Padat</div>
+      <div class="chip" data-val="Normal" onclick="toggleChip(this)">✅ Normal</div>
+      <div class="chip" data-val="Lembek" onclick="toggleChip(this)">🟫 Lembek</div>
+      <div class="chip" data-val="Cair" onclick="toggleChip(this)">💧 Cair</div>
+      <div class="chip" data-val="Berlendir" onclick="toggleChip(this)">🫧 Berlendir</div>
+      <div class="chip" data-val="Berdarah" onclick="toggleChip(this)">🔴 Berdarah</div>
+      <div class="chip" data-val="Berminyak" onclick="toggleChip(this)">🛢️ Berminyak</div>
+      <div class="chip" data-val="Berbusa" onclick="toggleChip(this)">🫧 Berbusa</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-label">⚖️ Kuantitas</div>
+    <div class="chip-group" id="eval-qty">
+      <div class="chip" data-val="Sangat Sedikit" onclick="selectChip(this)">🔸 Sangat Sedikit</div>
+      <div class="chip" data-val="Sedikit" onclick="selectChip(this)">▫️ Sedikit</div>
+      <div class="chip" data-val="Normal" onclick="selectChip(this)">✅ Normal</div>
+      <div class="chip" data-val="Banyak" onclick="selectChip(this)">🔶 Banyak</div>
+      <div class="chip" data-val="Sangat Banyak" onclick="selectChip(this)">🟠 Sangat Banyak</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-label">🎨 Warna Dominan</div>
+    <div class="color-grid">
+      <div class="color-item"><div class="color-chip" style="background:#C4956A" data-val="Coklat Muda" onclick="selectColor(this)"></div><div class="color-chip-label">Coklat Muda</div></div>
+      <div class="color-item"><div class="color-chip" style="background:#8B4513" data-val="Coklat" onclick="selectColor(this)"></div><div class="color-chip-label">Coklat</div></div>
+      <div class="color-item"><div class="color-chip" style="background:#4A2208" data-val="Coklat Tua" onclick="selectColor(this)"></div><div class="color-chip-label">Coklat Tua</div></div>
+      <div class="color-item"><div class="color-chip" style="background:#E8D44D" data-val="Kuning" onclick="selectColor(this)"></div><div class="color-chip-label">Kuning</div></div>
+      <div class="color-item"><div class="color-chip" style="background:#4CAF50" data-val="Hijau" onclick="selectColor(this)"></div><div class="color-chip-label">Hijau</div></div>
+      <div class="color-item"><div class="color-chip" style="background:#1A1A1A" data-val="Hitam" onclick="selectColor(this)"></div><div class="color-chip-label">Hitam</div></div>
+      <div class="color-item"><div class="color-chip" style="background:#EF4444" data-val="Merah" onclick="selectColor(this)"></div><div class="color-chip-label">Merah</div></div>
+      <div class="color-item"><div class="color-chip" style="background:#9E9E9E" data-val="Abu-Abu" onclick="selectColor(this)"></div><div class="color-chip-label">Abu-Abu</div></div>
+      <div class="color-item"><div class="color-chip" style="background:#F0EAD6;border:2px solid #ddd" data-val="Putih" onclick="selectColor(this)"></div><div class="color-chip-label">Putih</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-label">💪 Tingkat Kesulitan</div>
+    <div class="slider-labels"><span>😌 Mudah</span><span>😤 Sedang</span><span>😫 Sangat Sulit</span></div>
+    <input type="range" min="0" max="10" value="3" id="eval-diff" oninput="updateSlider(this)">
+    <div class="slider-val" id="eval-diff-val">3</div>
+  </div>
+  <div class="card">
+    <div class="section-label">🏥 Kondisi Pencernaan <span class="section-note">(boleh lebih dari satu)</span></div>
+    <div class="chip-group" id="eval-cond">
+      <div class="chip" data-val="Normal" onclick="toggleChip(this)">✅ Normal</div>
+      <div class="chip" data-val="Perut Panas" onclick="toggleChip(this)">🔥 Perut Panas</div>
+      <div class="chip" data-val="Mules" onclick="toggleChip(this)">😖 Mules</div>
+      <div class="chip" data-val="Sembelit" onclick="toggleChip(this)">🪨 Sembelit</div>
+      <div class="chip" data-val="Diare" onclick="toggleChip(this)">💧 Diare</div>
+      <div class="chip" data-val="Kembung" onclick="toggleChip(this)">🎈 Kembung</div>
+      <div class="chip" data-val="Begah" onclick="toggleChip(this)">🤢 Begah</div>
+      <div class="chip" data-val="Nyeri Perut" onclick="toggleChip(this)">⚡ Nyeri Perut</div>
+      <div class="chip" data-val="Sakit Saat BAB" onclick="toggleChip(this)">😣 Sakit Saat BAB</div>
+      <div class="chip" data-val="Tidak Tuntas" onclick="toggleChip(this)">🔄 Tidak Tuntas</div>
+      <div class="chip" data-val="Mudah Keluar" onclick="toggleChip(this)">🚀 Mudah Keluar</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-label">📝 Catatan <span class="section-note">(opsional)</span></div>
+    <textarea class="notes-area" id="eval-notes" placeholder="Tuliskan catatan tambahan..."></textarea>
+  </div>
+  <div style="padding:0 14px 20px">
+    <button class="btn btn-primary btn-full" style="font-size:17px;padding:17px" onclick="saveSession()">💾 Simpan Sesi</button>
+  </div>
+</div>
+<!-- STATS -->
+<div id="screen-stats" class="screen">
+  <div class="page-header"><h1>📊 Statistik</h1></div>
+  <div class="stats-tabs">
+    <div class="stats-tab active" onclick="setStatsPd(7,this)">7 Hari</div>
+    <div class="stats-tab" onclick="setStatsPd(30,this)">30 Hari</div>
+    <div class="stats-tab" onclick="setStatsPd(90,this)">3 Bulan</div>
+  </div>
+  <div class="period-card" onclick="showPdDetail()">
+    <div class="pc-header"><div class="pc-title" id="pc-title">📅 Last 7 Days</div><div style="color:var(--ts)">Detail ›</div></div>
+    <div class="pc-stats">
+      <div class="pc-stat"><div class="pv" id="pc-cnt">—</div><div class="pl">Poop Count</div></div>
+      <div class="pc-stat"><div class="pv" id="pc-avg">—</div><div class="pl">Avg Duration</div></div>
+      <div class="pc-stat"><div class="pv" id="pc-last">—</div><div class="pl">Last Duration</div></div>
+      <div class="pc-stat"><div class="pv" id="pc-cond" style="font-size:12px">—</div><div class="pl">Kondisi Sering</div></div>
+    </div>
+  </div>
+  <div class="card"><div class="card-title">📊 Frekuensi BAB</div><canvas id="c-freq" height="155"></canvas></div>
+  <div class="card"><div class="card-title">⏱️ Durasi Rata-rata (menit)</div><canvas id="c-dur" height="145"></canvas></div>
+  <div class="card">
+    <div class="card-title">💧 Komposisi Feses</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="flex:2"><canvas id="c-comp" height="155"></canvas></div>
+      <div id="lg-comp" style="font-size:11px;font-weight:700;color:var(--ts);flex:1"></div>
+    </div>
+  </div>
+  <div class="card"><div class="card-title">🏥 Kondisi Pencernaan</div><canvas id="c-cond" height="175"></canvas></div>
+  <div class="card">
+    <div class="card-title">🎨 Distribusi Warna</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="flex:2"><canvas id="c-color" height="155"></canvas></div>
+      <div id="lg-color" style="font-size:11px;font-weight:700;color:var(--ts);flex:1"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚖️ Distribusi Kuantitas</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="flex:2"><canvas id="c-qty" height="155"></canvas></div>
+      <div id="lg-qty" style="font-size:11px;font-weight:700;color:var(--ts);flex:1"></div>
+    </div>
+  </div>
+</div>
+<!-- HISTORY -->
+<div id="screen-history" class="screen">
+  <div class="page-header"><h1>📋 Histori</h1></div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" class="search-input" id="h-search" placeholder="Cari catatan, kondisi, komposisi..." oninput="renderHistory()">
+  </div>
+  <div class="hist-toolbar">
+    <div class="filter-row" id="ftr-time">
+      <div class="filter-pill active" data-f="all" onclick="setHistFlt('all',this)">Semua</div>
+      <div class="filter-pill" data-f="today" onclick="setHistFlt('today',this)">Hari Ini</div>
+      <div class="filter-pill" data-f="7d" onclick="setHistFlt('7d',this)">7 Hari</div>
+      <div class="filter-pill" data-f="30d" onclick="setHistFlt('30d',this)">30 Hari</div>
+      <div class="filter-pill" data-f="month" onclick="setHistFlt('month',this)">Bulan Ini</div>
+      <div class="filter-pill" data-f="year" onclick="setHistFlt('year',this)">Tahun Ini</div>
+    </div>
+    <button class="adv-toggle-btn" id="adv-btn" onclick="openAdvModal()">
+      <span>⚙️</span>
+      <span id="adv-cnt" style="display:none;position:absolute;top:-5px;right:-5px;background:var(--pr);color:#fff;border-radius:9px;min-width:16px;height:16px;font-size:10px;line-height:16px;text-align:center;font-weight:800;padding:0 3px">0</span>
+    </button>
+  </div>
+  <div class="history-list" id="history-list"></div>
+</div>
+<!-- DETAIL -->
+<div id="screen-detail" class="screen">
+  <div class="detail-hero">
+    <div class="detail-date" id="det-date">—</div>
+    <div class="detail-time" id="det-time">—</div>
+    <div class="detail-dur" id="det-dur">⏱️ —</div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="detail-row"><div class="dr-icon">💧</div><div><div class="dr-label">Komposisi</div><div class="dr-val" id="det-comp">—</div></div></div>
+    <div class="detail-row"><div class="dr-icon">⚖️</div><div><div class="dr-label">Kuantitas</div><div class="dr-val" id="det-qty">—</div></div></div>
+    <div class="detail-row">
+      <div class="dr-icon">🎨</div>
+      <div>
+        <div class="dr-label">Warna</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
+          <div id="det-cdot" style="width:20px;height:20px;border-radius:50%;background:#8B4513;border:2px solid #ccc;flex-shrink:0"></div>
+          <div class="dr-val" id="det-color">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-row">
+      <div class="dr-icon">💪</div>
+      <div>
+        <div class="dr-label">Tingkat Kesulitan</div>
+        <div class="dr-val" id="det-diff">—</div>
+        <div class="diff-bar-bg"><div class="diff-bar-fill" id="det-diff-bar"></div></div>
+      </div>
+    </div>
+    <div class="detail-row"><div class="dr-icon">🏥</div><div><div class="dr-label">Kondisi Pencernaan</div><div class="dr-val" id="det-cond">—</div></div></div>
+    <div class="detail-row"><div class="dr-icon">📝</div><div><div class="dr-label">Catatan</div><div class="dr-val" id="det-notes" style="color:var(--ts)">—</div></div></div>
+  </div>
+  <div class="detail-actions">
+    <button class="btn btn-ghost" style="flex:1" onclick="editRecord()">✏️ Edit</button>
+    <button class="btn btn-danger" style="flex:1" onclick="deleteRecord()">🗑️ Hapus</button>
+  </div>
+  <div style="padding:0 14px 10px">
+    <button class="btn btn-outline btn-full" onclick="goBack()">← Kembali</button>
+  </div>
+</div>
+<!-- NAV -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="gotoScreen('home')">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Beranda</span>
+  </button>
+  <button class="nav-btn" id="nav-timer" onclick="gotoScreen('timer')">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg><span>Timer</span>
+  </button>
+  <button class="nav-btn" id="nav-stats" onclick="gotoScreen('stats')">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg><span>Statistik</span>
+  </button>
+  <button class="nav-btn" id="nav-history" onclick="gotoScreen('history')">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg><span>Histori</span>
+  </button>
+</nav>
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-pd" onclick="closeModal('modal-pd')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <h3 id="modal-pd-title">Detail Periode</h3>
+    <div id="modal-pd-body"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-edit" onclick="closeModal('modal-edit')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <h3>✏️ Edit Catatan</h3>
+    <div id="modal-edit-body"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-adv" onclick="closeModal('modal-adv')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <h3>⚙️ Filter Lanjutan</h3>
+    <div class="adv-filter-section">
+      <div class="adv-filter-label">Komposisi</div>
+      <div class="chip-group" id="flt-comp">
+        <div class="chip" data-val="Sangat Padat" onclick="toggleFltChip(this)">Sangat Padat</div>
+        <div class="chip" data-val="Padat" onclick="toggleFltChip(this)">Padat</div>
+        <div class="chip" data-val="Normal" onclick="toggleFltChip(this)">Normal</div>
+        <div class="chip" data-val="Lembek" onclick="toggleFltChip(this)">Lembek</div>
+        <div class="chip" data-val="Cair" onclick="toggleFltChip(this)">Cair</div>
+        <div class="chip" data-val="Berdarah" onclick="toggleFltChip(this)">Berdarah</div>
+      </div>
+    </div>
+    <div class="adv-filter-section">
+      <div class="adv-filter-label">Warna</div>
+      <div class="chip-group" id="flt-color">
+        <div class="chip" data-val="Coklat Muda" onclick="toggleFltChip(this)">Coklat Muda</div>
+        <div class="chip" data-val="Coklat" onclick="toggleFltChip(this)">Coklat</div>
+        <div class="chip" data-val="Kuning" onclick="toggleFltChip(this)">Kuning</div>
+        <div class="chip" data-val="Hijau" onclick="toggleFltChip(this)">Hijau</div>
+        <div class="chip" data-val="Hitam" onclick="toggleFltChip(this)">Hitam</div>
+        <div class="chip" data-val="Merah" onclick="toggleFltChip(this)">Merah</div>
+      </div>
+    </div>
+    <div class="adv-filter-section">
+      <div class="adv-filter-label">Kondisi Pencernaan</div>
+      <div class="chip-group" id="flt-cond">
+        <div class="chip" data-val="Normal" onclick="toggleFltChip(this)">Normal</div>
+        <div class="chip" data-val="Mules" onclick="toggleFltChip(this)">Mules</div>
+        <div class="chip" data-val="Sembelit" onclick="toggleFltChip(this)">Sembelit</div>
+        <div class="chip" data-val="Diare" onclick="toggleFltChip(this)">Diare</div>
+        <div class="chip" data-val="Kembung" onclick="toggleFltChip(this)">Kembung</div>
+        <div class="chip" data-val="Nyeri Perut" onclick="toggleFltChip(this)">Nyeri Perut</div>
+      </div>
+    </div>
+    <div class="adv-filter-section" style="margin-bottom:18px">
+      <div class="adv-filter-label">Tingkat Kesulitan (maks)</div>
+      <input type="range" min="0" max="10" value="10" id="flt-diff" oninput="onFltDiff(this)">
+      <div style="text-align:center;font-size:13px;font-weight:700;color:var(--pr);margin-top:4px" id="flt-diff-val">Semua (0–10)</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" style="flex:1" onclick="resetFilters()">Reset</button>
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('modal-adv');renderHistory()">Terapkan</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const DBK='pt_db_v4',SSK='pt_ses_v2';
+const CHEX={'Coklat Muda':'#C4956A','Coklat':'#8B4513','Coklat Tua':'#4A2208','Kuning':'#E8D44D','Hijau':'#4CAF50','Hitam':'#1A1A1A','Merah':'#EF4444','Abu-Abu':'#9E9E9E','Putih':'#F0EAD6'};
+const PCOLS=['#FF6B35','#4ECDC4','#FFD93D','#A855F7','#22C55E','#EF4444','#F97316','#06B6D4'];
+let db=(()=>{try{return JSON.parse(localStorage.getItem(DBK))||{records:[]}}catch{return{records:[]}}})();
+let sesh=null,tv=null,curDet=null,curPd=7,hfTime='all';
+const sDB=()=>localStorage.setItem(DBK,JSON.stringify(db));
+const lSes=()=>{try{return JSON.parse(localStorage.getItem(SSK))}catch{return null}};
+const sSes=s=>s?localStorage.setItem(SSK,JSON.stringify(s)):localStorage.removeItem(SSK);
+let sStack=['home'];
+function gotoScreen(n,push=true){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const e=document.getElementById('screen-'+n);if(e)e.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nav-'+n);if(nb)nb.classList.add('active');
+  document.getElementById('bottom-nav').style.display=['timer','eval','detail'].includes(n)?'none':'flex';
+  if(push)sStack.push(n);
+  if(n==='home')renderHome();
+  if(n==='timer')startTR();
+  if(n==='stats')requestAnimationFrame(()=>requestAnimationFrame(renderStats));
+  if(n==='history')renderHistory();
+}
+function goBack(){sStack.pop();gotoScreen(sStack[sStack.length-1]||'home',false);}
+function startSession(){if(sesh){gotoScreen('timer');return;}sesh={startTime:Date.now(),startISO:new Date().toISOString()};sSes(sesh);gotoScreen('timer');}
+function goTimer(){sesh=lSes();sesh?gotoScreen('timer'):startSession();}
+function startTR(){sesh=lSes();if(!sesh)return;if(tv)clearInterval(tv);tick();tv=setInterval(tick,1000);}
+function tick(){
+  if(!sesh)return;
+  const el=Math.floor((Date.now()-sesh.startTime)/1000);
+  const mm=String(Math.floor(el/60)).padStart(2,'0'),ss=String(el%60).padStart(2,'0');
+  const em=document.getElementById('t-mm'),es=document.getElementById('t-ss');
+  if(em)em.textContent=mm;if(es)es.textContent=ss;
+  const si=document.getElementById('t-start-info');if(si)si.textContent='Mulai: '+fmtT(new Date(sesh.startTime));
+  const bt=document.getElementById('banner-timer');if(bt)bt.textContent=mm+':'+ss;
+}
+function finishSession(){
+  if(!sesh){gotoScreen('home');return;}
+  if(tv){clearInterval(tv);tv=null;}
+  sesh.endTime=Date.now();sesh.endISO=new Date().toISOString();
+  sesh.duration=Math.floor((sesh.endTime-sesh.startTime)/1000);
+  sSes(sesh);
+  document.querySelectorAll('#screen-eval .chip').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('#screen-eval .color-chip').forEach(c=>c.classList.remove('selected'));
+  const sl=document.getElementById('eval-diff');if(sl){sl.value=3;updateSlider(sl);}
+  const na=document.getElementById('eval-notes');if(na)na.value='';
+  const badge=document.getElementById('eval-dur-badge');if(badge)badge.textContent='⏱️ '+fmtD(sesh.duration);
+  gotoScreen('eval');
+}
+function saveSession(){
+  if(!sesh||sesh.duration==null){showToast('❌ Tidak ada sesi aktif!');return;}
+  const comp=getMulti('eval-comp'),qty=getSingle('eval-qty'),clr=getClr();
+  const diff=parseInt(document.getElementById('eval-diff').value);
+  const cond=getMulti('eval-cond'),notes=document.getElementById('eval-notes').value.trim();
+  const rec={id:Date.now().toString(),startTime:sesh.startTime,endTime:sesh.endTime,
+    startISO:sesh.startISO,endISO:sesh.endISO,duration:sesh.duration,
+    composition:comp.length?comp:['Normal'],quantity:qty||'Normal',color:clr||'Coklat',
+    difficulty:diff,conditions:cond.length?cond:['Normal'],notes,
+    date:new Date(sesh.startTime).toISOString().split('T')[0]};
+  db.records.unshift(rec);sDB();sesh=null;sSes(null);
+  showToast('✅ Sesi berhasil disimpan!');gotoScreen('home');
+}
+function toggleChip(el){el.classList.toggle('selected');}
+function selectChip(el){el.closest('.chip-group').querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
+function selectColor(el){document.querySelectorAll('#screen-eval .color-chip').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
+function toggleFltChip(el){el.classList.toggle('selected');renderHistory();updAdvCnt();}
+function getMulti(id){return[...document.getElementById(id).querySelectorAll('.chip.selected')].map(c=>c.dataset.val);}
+function getSingle(id){const s=document.getElementById(id).querySelector('.chip.selected');return s?s.dataset.val:null;}
+function getClr(){const s=document.querySelector('#screen-eval .color-chip.selected');return s?s.dataset.val:null;}
+function updateSlider(el){
+  el.style.setProperty('--pct',(el.value/10*100)+'%');
+  const dv=document.getElementById(el.id==='eval-diff'?'eval-diff-val':'edit-diff-val');
+  if(dv){const map={0:'Mudah banget',3:'Agak mudah',5:'Sedang',7:'Agak sulit',10:'Sangat sulit'};
+    const k=Object.keys(map).filter(k=>parseInt(el.value)>=parseInt(k)).pop();
+    dv.textContent=el.value+(k?' — '+map[k]:'');}
+}
+function openAdvModal(){openModal('modal-adv');}
+function onFltDiff(el){el.style.setProperty('--pct',el.value/10*100+'%');document.getElementById('flt-diff-val').textContent=el.value==10?'Semua (0–10)':'0–'+el.value;renderHistory();updAdvCnt();}
+function updAdvCnt(){
+  const n=[...document.querySelectorAll('#flt-comp .chip.selected')].length+[...document.querySelectorAll('#flt-color .chip.selected')].length+[...document.querySelectorAll('#flt-cond .chip.selected')].length+(parseInt(document.getElementById('flt-diff')?.value||10)<10?1:0);
+  const b=document.getElementById('adv-cnt');if(b){b.style.display=n>0?'inline':'none';b.textContent=n;}
+}
+function resetFilters(){
+  document.querySelectorAll('#modal-adv .chip').forEach(c=>c.classList.remove('selected'));
+  const df=document.getElementById('flt-diff');if(df){df.value=10;df.style.setProperty('--pct','100%');document.getElementById('flt-diff-val').textContent='Semua (0–10)';}
+  hfTime='all';
+  document.querySelectorAll('#ftr-time .filter-pill').forEach(p=>p.classList.remove('active'));
+  document.querySelector('#ftr-time .filter-pill[data-f="all"]').classList.add('active');
+  const hs=document.getElementById('h-search');if(hs)hs.value='';
+  updAdvCnt();renderHistory();
+}
+/* HOME */
+function renderHome(){
+  sesh=lSes();
+  const h=new Date().getHours();
+  const ge=document.getElementById('home-greeting');
+  if(ge)ge.textContent=(h<11?'Selamat pagi! ☀️':h<15?'Selamat siang! 🌤️':h<18?'Selamat sore! 🌇':'Selamat malam! 🌙');
+  const bw=document.getElementById('abw');
+  if(sesh){bw.style.display='block';if(!tv){tv=setInterval(tick,1000);tick();}}
+  else{bw.style.display='none';if(tv){clearInterval(tv);tv=null;}}
+  const td=todayStr(),tr=db.records.filter(r=>r.date===td);
+  document.getElementById('h-count').textContent=tr.length;
+  const ts=tr.reduce((a,r)=>a+r.duration,0);
+  document.getElementById('h-tdur').textContent=tr.length?fmtD(ts):'—';
+  if(tr.length){document.getElementById('h-ldur').textContent=fmtD(tr[0].duration);document.getElementById('h-lcond').textContent=tr[0].conditions.slice(0,2).join(', ');}
+  else{document.getElementById('h-ldur').textContent='—';document.getElementById('h-lcond').textContent='—';}
+  const now=new Date(),dn=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const wr=[];for(let i=0;i<7;i++){const d=new Date(now);d.setDate(now.getDate()-i);db.records.filter(r=>r.date===d.toISOString().split('T')[0]).forEach(r=>wr.push(r));}
+  document.getElementById('ws-cnt').textContent=wr.length;
+  const wa=wr.length?wr.reduce((a,r)=>a+r.duration,0)/wr.length:0;
+  document.getElementById('ws-avg').textContent=wr.length?fmtD(Math.round(wa)):'—';
+  const wf={};wr.forEach(r=>r.conditions.forEach(c=>wf[c]=(wf[c]||0)+1));
+  const wt=Object.entries(wf).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('ws-cond').textContent=wt?wt[0]:'—';
+  const mo=now.getMonth(),yr=now.getFullYear(),dayP=now.getDate();
+  const mr=db.records.filter(r=>{const d=new Date(r.startTime);return d.getMonth()===mo&&d.getFullYear()===yr;});
+  document.getElementById('ms-cnt').textContent=mr.length;
+  const ma=mr.length?mr.reduce((a,r)=>a+r.duration,0)/mr.length:0;
+  document.getElementById('ms-avg').textContent=mr.length?fmtD(Math.round(ma)):'—';
+  document.getElementById('ms-pd').textContent=dayP>0?(mr.length/dayP).toFixed(1):'0';
+  const wb=document.getElementById('home-wbar'),d7=[];let mx=0;
+  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);const ds=d.toISOString().split('T')[0];const c=db.records.filter(r=>r.date===ds).length;d7.push({l:dn[d.getDay()],c,t:i===0});if(c>mx)mx=c;}
+  wb.innerHTML=d7.map(x=>{const h=mx>0?Math.max(4,(x.c/mx)*48):4;return`<div class="wb-item"><div class="wb-fill${x.t?' today':''}" style="height:${h}px"></div><div class="wb-lbl">${x.l}</div></div>`;}).join('');
+  renderInsight();
+}
+function renderInsight(){
+  const ic=document.getElementById('home-insight'),it=document.getElementById('home-insight-txt');
+  const r7=getInDays(7),td=todayStr();let msg=null;
+  const bl=r7.filter(r=>r.color==='Merah'||r.color==='Hitam'||r.composition.includes('Berdarah'));
+  if(bl.length>=2){msg='⚠️ Feses berwarna hitam/merah atau berdarah muncul beberapa kali. Segera konsultasikan ke dokter ya!';}
+  else{
+    const sb=r7.filter(r=>r.conditions.includes('Sembelit')),di=r7.filter(r=>r.conditions.includes('Diare'));
+    if(sb.length>=5)msg=`🪨 Sembelit muncul ${sb.length}x dalam 7 hari. Perbanyak serat, air putih, dan aktivitas fisik.`;
+    else if(di.length>=4)msg=`💧 Diare muncul ${di.length}x dalam 7 hari. Jaga hidrasi dan perhatikan pola makan.`;
+    else if(db.records.filter(r=>r.date===td).length===0&&new Date().getHours()>=13)msg='💩 Hari ini belum ada catatan BAB. Jangan lupa mencatat ya!';
+  }
+  if(ic&&it){ic.style.display=msg?'flex':'none';if(msg)it.textContent=msg;}
+}
+/* STATS */
+function setStatsPd(d,el){curPd=d;document.querySelectorAll('.stats-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderStats();}
+function renderStats(){
+  const recs=getInDays(curPd);
+  renderPdCard(recs);
+  drawFreq(recs);drawDur(recs);
+  drawPie('c-comp','lg-comp',bFreq(recs,r=>r.composition),PCOLS);
+  drawCond(recs);
+  drawPie('c-color','lg-color',bFreq(recs,r=>[r.color]),null,true);
+  drawPie('c-qty','lg-qty',bFreq(recs,r=>[r.quantity]),['#FF6B35','#4ECDC4','#FFD93D','#A855F7','#22C55E']);
+}
+function bFreq(recs,fn){const m={};recs.forEach(r=>fn(r).forEach(v=>{if(v)m[v]=(m[v]||0)+1;}));return Object.entries(m).sort((a,b)=>b[1]-a[1]);}
+function getInDays(d){const c=Date.now()-d*86400000;return db.records.filter(r=>r.startTime>=c);}
+function renderPdCard(recs){
+  const l=curPd===7?'7 Hari':curPd===30?'30 Hari':'3 Bulan';
+  document.getElementById('pc-title').textContent='📅 Last '+l;
+  document.getElementById('pc-cnt').textContent=recs.length||'—';
+  if(recs.length){
+    document.getElementById('pc-avg').textContent=fmtD(Math.round(recs.reduce((a,r)=>a+r.duration,0)/recs.length));
+    document.getElementById('pc-last').textContent=fmtD(recs[0].duration);
+    const cf={};recs.forEach(r=>r.conditions.forEach(c=>cf[c]=(cf[c]||0)+1));
+    const tp=Object.entries(cf).sort((a,b)=>b[1]-a[1])[0];
+    document.getElementById('pc-cond').textContent=tp?tp[0]:'—';
+  }else['pc-avg','pc-last','pc-cond'].forEach(id=>document.getElementById(id).textContent='—');
+}
+function drawFreq(recs){
+  const days=Math.min(curPd,30),lb=[],dt=[],now=new Date(),dn=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  for(let i=days-1;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);const ds=d.toISOString().split('T')[0];lb.push(days<=14?dn[d.getDay()]:(d.getMonth()+1)+'/'+(d.getDate()));dt.push(recs.filter(r=>r.date===ds).length);}
+  drawBar('c-freq',lb,dt,'#FF6B35');
+}
+function drawDur(recs){
+  const days=Math.min(curPd,30),lb=[],dt=[],now=new Date(),dn=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  for(let i=days-1;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);const ds=d.toISOString().split('T')[0];const dr=recs.filter(r=>r.date===ds);const avg=dr.length?dr.reduce((a,r)=>a+r.duration,0)/dr.length/60:0;lb.push(days<=14?dn[d.getDay()]:(d.getMonth()+1)+'/'+(d.getDate()));dt.push(parseFloat(avg.toFixed(1)));}
+  drawLine('c-dur',lb,dt,'#4ECDC4');
+}
+function drawCond(recs){const e=bFreq(recs,r=>r.conditions).slice(0,8);drawHBar('c-cond',e.map(x=>x[0]),e.map(x=>x[1]),'#A855F7');}
+/* CANVAS */
+function gc(id){
+  const c=document.getElementById(id);if(!c)return null;
+  const H=parseInt(c.getAttribute('height')||155),dpr=window.devicePixelRatio||1;
+  let W=c.offsetWidth||c.parentElement?.offsetWidth||c.clientWidth;
+  if(!W||W<10)W=320;
+  c.style.width=W+'px';c.style.height=H+'px';
+  c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);
+  const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  return{ctx,W,H};
+}
+function drawBar(id,lb,dt,col){
+  const cv=gc(id);if(!cv)return;const{ctx,W,H}=cv;
+  const pL=30,pR=8,pT=10,pB=22,cW=W-pL-pR,cH=H-pT-pB,max=Math.max(...dt,1);
+  ctx.clearRect(0,0,W,H);ctx.font='600 9px Nunito,sans-serif';
+  for(let i=0;i<=4;i++){const y=pT+cH-(i/4)*cH;ctx.strokeStyle='#FFE8D6';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(pL+cW,y);ctx.stroke();ctx.fillStyle='#aaa';ctx.textAlign='right';ctx.fillText(Math.round((i/4)*max),pL-3,y+3);}
+  const bw=cW/lb.length,step=Math.max(1,Math.floor(lb.length/10));
+  dt.forEach((v,i)=>{const bh=Math.max(2,(v/max)*cH),x=pL+i*bw+bw*.15,y=pT+cH-bh;ctx.fillStyle=col;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,bw*.7,bh,[3,3,0,0]);else ctx.rect(x,y,bw*.7,bh);ctx.fill();ctx.fillStyle='#777';ctx.textAlign='center';if(i%step===0)ctx.fillText(lb[i],x+bw*.35,H-pB+12);});
+}
+function drawLine(id,lb,dt,col){
+  const cv=gc(id);if(!cv)return;const{ctx,W,H}=cv;
+  const pL=30,pR=8,pT=10,pB=22,cW=W-pL-pR,cH=H-pT-pB,max=Math.max(...dt,.1);
+  ctx.clearRect(0,0,W,H);ctx.font='600 9px Nunito,sans-serif';
+  for(let i=0;i<=4;i++){const y=pT+cH-(i/4)*cH;ctx.strokeStyle='#FFE8D6';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(pL+cW,y);ctx.stroke();ctx.fillStyle='#aaa';ctx.textAlign='right';ctx.fillText(((i/4)*max).toFixed(1),pL-3,y+3);}
+  if(dt.every(d=>d===0))return;
+  const pts=dt.map((v,i)=>({x:pL+(i/(dt.length-1||1))*cW,y:pT+cH-(v/max)*cH}));
+  const g=ctx.createLinearGradient(0,pT,0,pT+cH);g.addColorStop(0,col+'44');g.addColorStop(1,col+'00');
+  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(pts[0].x,pT+cH);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,pT+cH);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
+  pts.forEach((p,i)=>{if(!dt[i])return;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x,p.y,3.5,0,Math.PI*2);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();});
+  ctx.fillStyle='#777';ctx.textAlign='center';const step=Math.max(1,Math.floor(lb.length/10));
+  pts.forEach((p,i)=>{if(i%step===0)ctx.fillText(lb[i],p.x,H-pB+12);});
+}
+function drawPie(cid,lgid,entries,cols,useMap=false){
+  entries=entries.slice(0,7);
+  const lg=document.getElementById(lgid);
+  const cv=gc(cid);if(!cv)return;const{ctx,W,H}=cv;
+  const tot=entries.reduce((a,e)=>a+e[1],0);
+  if(!tot){ctx.clearRect(0,0,W,H);if(lg)lg.innerHTML='<div style="font-size:11px;color:var(--ts)">Belum ada data</div>';return;}
+  const cx=W*.42,cy=H*.5,r=Math.min(cx,cy)*.85;
+  const uc=entries.map((e,i)=>useMap?(CHEX[e[0]]||PCOLS[i%PCOLS.length]):(cols?cols[i%cols.length]:PCOLS[i%PCOLS.length]));
+  let ang=-Math.PI/2;
+  ctx.clearRect(0,0,W,H);
+  entries.forEach((e,i)=>{const sl=(e[1]/tot)*Math.PI*2;ctx.fillStyle=uc[i];ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,ang,ang+sl);ctx.closePath();ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();ang+=sl;});
+  ctx.fillStyle='white';ctx.beginPath();ctx.arc(cx,cy,r*.48,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#555';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(tot+'x',cx,cy);
+  if(lg)lg.innerHTML=entries.map((e,i)=>`<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px"><div style="width:10px;height:10px;border-radius:50%;background:${uc[i]};flex-shrink:0"></div><span style="font-size:11px">${e[0].length>10?e[0].slice(0,9)+'…':e[0]}</span></div>`).join('');
+}
+function drawHBar(id,lb,dt,col){
+  const cv=gc(id);if(!cv)return;const{ctx,W,H}=cv;
+  if(!lb.length){ctx.clearRect(0,0,W,H);ctx.fillStyle='#aaa';ctx.font='600 12px Nunito';ctx.textAlign='center';ctx.fillText('Belum ada data',W/2,H/2);return;}
+  const max=Math.max(...dt,1),rH=H/lb.length,pL=84,pR=38;
+  ctx.clearRect(0,0,W,H);ctx.font='700 11px Nunito,sans-serif';
+  lb.forEach((l,i)=>{const y=i*rH+rH*.5,bw=Math.max(3,(dt[i]/max)*(W-pL-pR));
+    ctx.fillStyle='#FFE8D6';if(ctx.roundRect){ctx.beginPath();ctx.roundRect(pL,y-rH*.25,W-pL-pR,rH*.5,4);ctx.fill();}else ctx.fillRect(pL,y-rH*.25,W-pL-pR,rH*.5);
+    ctx.fillStyle=col;if(ctx.roundRect){ctx.beginPath();ctx.roundRect(pL,y-rH*.25,bw,rH*.5,4);ctx.fill();}else ctx.fillRect(pL,y-rH*.25,bw,rH*.5);
+    ctx.fillStyle='#444';ctx.textAlign='right';ctx.fillText(l.length>11?l.slice(0,10)+'…':l,pL-6,y+4);
+    ctx.fillStyle='#333';ctx.textAlign='left';ctx.fillText(dt[i]+'x',Math.min(pL+bw+4,W-pR+2),y+4);
+  });
+}
+/* HISTORY */
+function setHistFlt(f,el){hfTime=f;document.querySelectorAll('#ftr-time .filter-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');renderHistory();}
+function getFltRecs(){
+  const now=Date.now(),td=todayStr();let recs=[...db.records];
+  if(hfTime==='today')recs=recs.filter(r=>r.date===td);
+  else if(hfTime==='7d')recs=recs.filter(r=>r.startTime>=now-7*86400000);
+  else if(hfTime==='30d')recs=recs.filter(r=>r.startTime>=now-30*86400000);
+  else if(hfTime==='month'){const m=new Date().getMonth(),y=new Date().getFullYear();recs=recs.filter(r=>{const d=new Date(r.startTime);return d.getMonth()===m&&d.getFullYear()===y;});}
+  else if(hfTime==='year'){const y=new Date().getFullYear();recs=recs.filter(r=>new Date(r.startTime).getFullYear()===y);}
+  const fc=[...document.querySelectorAll('#flt-comp .chip.selected')].map(c=>c.dataset.val);
+  if(fc.length)recs=recs.filter(r=>fc.some(v=>r.composition.includes(v)));
+  const fco=[...document.querySelectorAll('#flt-color .chip.selected')].map(c=>c.dataset.val);
+  if(fco.length)recs=recs.filter(r=>fco.includes(r.color));
+  const fcd=[...document.querySelectorAll('#flt-cond .chip.selected')].map(c=>c.dataset.val);
+  if(fcd.length)recs=recs.filter(r=>fcd.some(v=>r.conditions.includes(v)));
+  const df=document.getElementById('flt-diff');
+  if(df&&parseInt(df.value)<10)recs=recs.filter(r=>r.difficulty<=parseInt(df.value));
+  const q=(document.getElementById('h-search')?.value||'').toLowerCase().trim();
+  if(q)recs=recs.filter(r=>r.composition.join(' ').toLowerCase().includes(q)||r.conditions.join(' ').toLowerCase().includes(q)||(r.notes||'').toLowerCase().includes(q)||(r.color||'').toLowerCase().includes(q)||(r.quantity||'').toLowerCase().includes(q));
+  return recs;
+}
+function renderHistory(){
+  const list=document.getElementById('history-list');if(!list)return;
+  const recs=getFltRecs();
+  if(!recs.length){list.innerHTML='<div class="empty-state"><div class="es-icon">🗂️</div><h3>Tidak ada catatan</h3><p>Tidak ada data yang cocok dengan filter kamu.</p></div>';return;}
+  const td=todayStr(),yd=(()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().split('T')[0];})();
+  const grp={};recs.forEach(r=>(grp[r.date]=grp[r.date]||[]).push(r));
+  list.innerHTML=Object.entries(grp).sort((a,b)=>b[0].localeCompare(a[0])).map(([date,rs])=>{
+    const lbl=date===td?'Hari Ini 📅':date===yd?'Kemarin':fmtDt(date);
+    const items=rs.map(r=>{const hex=CHEX[r.color]||'#8B4513';
+      return`<div class="history-item" onclick="openDetail('${r.id}')"><div class="hi-dot" style="background:${hex}22">💩</div><div class="hi-info"><div class="hi-time">${fmtT(new Date(r.startTime))}</div><div class="hi-dur">${fmtD(r.duration)} · ${r.quantity}</div><div class="hi-tags">${r.composition.slice(0,2).map(c=>`<span class="hi-tag">${c}</span>`).join('')}${r.conditions.slice(0,2).map(c=>`<span class="hi-tag cond">${c}</span>`).join('')}</div></div><div class="hi-arrow">›</div></div>`;
+    }).join('');
+    return`<div class="history-date-group"><div class="history-date-label">${lbl}</div>${items}</div>`;
+  }).join('');
+}
+/* DETAIL */
+function openDetail(id){
+  const rec=db.records.find(r=>r.id===id);if(!rec)return;curDet=id;
+  document.getElementById('det-date').textContent=fmtDt(rec.date);
+  document.getElementById('det-time').textContent=fmtT(new Date(rec.startTime))+' — '+fmtT(new Date(rec.endTime));
+  document.getElementById('det-dur').textContent='⏱️ '+fmtD(rec.duration);
+  document.getElementById('det-comp').textContent=rec.composition.join(', ');
+  document.getElementById('det-qty').textContent=rec.quantity;
+  document.getElementById('det-color').textContent=rec.color;
+  document.getElementById('det-cdot').style.background=CHEX[rec.color]||'#8B4513';
+  document.getElementById('det-diff').textContent=rec.difficulty+'/10';
+  const dc=rec.difficulty<=3?'#22C55E':rec.difficulty<=6?'#FFD93D':'#EF4444';
+  document.getElementById('det-diff-bar').style.cssText=`width:${rec.difficulty*10}%;background:${dc}`;
+  document.getElementById('det-cond').textContent=rec.conditions.join(', ');
+  const ne=document.getElementById('det-notes');
+  ne.textContent=rec.notes||'Tidak ada catatan';ne.style.color=rec.notes?'var(--tx)':'var(--ts)';
+  gotoScreen('detail');
+}
+/* EDIT — Full */
+function editRecord(){
+  const rec=db.records.find(r=>r.id===curDet);if(!rec)return;
+  const COMPS=['Sangat Padat','Padat','Normal','Lembek','Cair','Berlendir','Berdarah','Berminyak','Berbusa'];
+  const QTYS=['Sangat Sedikit','Sedikit','Normal','Banyak','Sangat Banyak'];
+  const CONDS=['Normal','Perut Panas','Mules','Sembelit','Diare','Kembung','Begah','Nyeri Perut','Sakit Saat BAB','Tidak Tuntas','Mudah Keluar'];
+  document.getElementById('modal-edit-body').innerHTML=`
+    <div class="modal-section">
+      <div class="section-label">💧 Komposisi <span class="section-note">(boleh lebih dari satu)</span></div>
+      <div class="chip-group" id="ec-comp">${COMPS.map(v=>`<div class="chip${rec.composition.includes(v)?' selected':''}" onclick="toggleChip(this)" data-val="${v}">${v}</div>`).join('')}</div>
+    </div>
+    <div class="modal-section">
+      <div class="section-label">⚖️ Kuantitas</div>
+      <div class="chip-group" id="ec-qty">${QTYS.map(v=>`<div class="chip${rec.quantity===v?' selected':''}" onclick="selectChip(this)" data-val="${v}">${v}</div>`).join('')}</div>
+    </div>
+    <div class="modal-section">
+      <div class="section-label">🎨 Warna</div>
+      <div class="color-grid">${Object.entries(CHEX).map(([n,h])=>`<div class="color-item"><div class="color-chip${rec.color===n?' selected':''}" style="background:${h}" data-val="${n}" onclick="editClr(this)"></div><div class="color-chip-label">${n}</div></div>`).join('')}</div>
+    </div>
+    <div class="modal-section">
+      <div class="section-label">💪 Kesulitan</div>
+      <input type="range" min="0" max="10" value="${rec.difficulty}" id="ec-diff" oninput="this.style.setProperty('--pct',this.value/10*100+'%');document.getElementById('ec-diff-val').textContent=this.value" style="--pct:${rec.difficulty*10}%">
+      <div class="slider-val" id="ec-diff-val">${rec.difficulty}</div>
+    </div>
+    <div class="modal-section">
+      <div class="section-label">🏥 Kondisi <span class="section-note">(boleh lebih dari satu)</span></div>
+      <div class="chip-group" id="ec-cond">${CONDS.map(v=>`<div class="chip${rec.conditions.includes(v)?' selected':''}" onclick="toggleChip(this)" data-val="${v}">${v}</div>`).join('')}</div>
+    </div>
+    <div class="modal-section">
+      <div class="section-label">📝 Catatan</div>
+      <textarea class="notes-area" id="ec-notes">${rec.notes||''}</textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-edit')">Batal</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveEdit()">Simpan</button>
+    </div>`;
+  openModal('modal-edit');
+}
+function editClr(el){document.querySelectorAll('#modal-edit-body .color-chip').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
+function saveEdit(){
+  const rec=db.records.find(r=>r.id===curDet);if(!rec)return;
+  const comp=[...document.querySelectorAll('#ec-comp .chip.selected')].map(c=>c.dataset.val);
+  const qty=document.querySelector('#ec-qty .chip.selected')?.dataset.val;
+  const clr=document.querySelector('#modal-edit-body .color-chip.selected')?.dataset.val;
+  const diff=parseInt(document.getElementById('ec-diff')?.value);
+  const cond=[...document.querySelectorAll('#ec-cond .chip.selected')].map(c=>c.dataset.val);
+  const notes=document.getElementById('ec-notes')?.value.trim();
+  if(comp.length)rec.composition=comp;if(qty)rec.quantity=qty;if(clr)rec.color=clr;
+  if(!isNaN(diff))rec.difficulty=diff;if(cond.length)rec.conditions=cond;if(notes!==undefined)rec.notes=notes;
+  sDB();closeModal('modal-edit');openDetail(curDet);showToast('✅ Catatan berhasil diperbarui!');
+}
+function deleteRecord(){
+  if(!confirm('Hapus catatan ini? Tidak dapat dibatalkan.'))return;
+  db.records=db.records.filter(r=>r.id!==curDet);sDB();curDet=null;showToast('🗑️ Catatan dihapus!');goBack();
+}
+/* PERIOD DETAIL */
+function showPdDetail(){
+  const recs=getInDays(curPd),l=curPd===7?'7 Hari':curPd===30?'30 Hari':'3 Bulan';
+  document.getElementById('modal-pd-title').textContent='📅 Last '+l+' — Detail';
+  const durs=recs.map(r=>r.duration),avg=durs.length?durs.reduce((a,b)=>a+b,0)/durs.length:0;
+  const mn=durs.length?Math.min(...durs):0,mx=durs.length?Math.max(...durs):0;
+  const cf={};recs.forEach(r=>r.conditions.forEach(c=>cf[c]=(cf[c]||0)+1));
+  const ce=Object.entries(cf).sort((a,b)=>b[1]-a[1]);
+  const dm={};recs.forEach(r=>{dm[r.date]=(dm[r.date]||0)+1;});
+  document.getElementById('modal-pd-body').innerHTML=`
+    <div class="pd-box"><div class="pd-box-title">⏱️ Analisis Durasi</div>
+      <div class="pd-3col">
+        <div><div class="pdc-val" style="color:var(--pr)">${fmtD(Math.round(avg))}</div><div class="pdc-lbl">Rata-rata</div></div>
+        <div><div class="pdc-val" style="color:#22C55E">${fmtD(mn)}</div><div class="pdc-lbl">Tercepat</div></div>
+        <div><div class="pdc-val" style="color:#EF4444">${fmtD(mx)}</div><div class="pdc-lbl">Terlama</div></div>
+      </div>
+    </div>
+    <div class="pd-box"><div class="pd-box-title">🏥 Kondisi Pencernaan</div>
+      ${ce.length?ce.map(([c,n])=>`<div class="pd-row"><span>${c}</span><span style="color:var(--pr)">${n}x</span></div>`).join(''):'<div style="font-size:13px;color:var(--ts)">Tidak ada data</div>'}
+    </div>
+    <div class="pd-box"><div class="pd-box-title">📅 BAB Per Hari</div>
+      ${Object.entries(dm).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10).map(([d,n])=>`<div class="pd-row"><span>${fmtDt(d)}</span><span style="color:var(--pr)">${n}x</span></div>`).join('')}
+    </div>
+    <div class="pd-box"><div class="pd-box-title">💧 Top Komposisi</div>
+      ${bFreq(recs,r=>r.composition).slice(0,5).map(([c,n])=>`<div class="pd-row"><span>${c}</span><span style="color:var(--scd)">${n}x</span></div>`).join('')||'<div style="font-size:13px;color:var(--ts)">Tidak ada data</div>'}
+    </div>`;
+  openModal('modal-pd');
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function showToast(msg,ms=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
+/* FORMATTERS */
+const todayStr=()=>new Date().toISOString().split('T')[0];
+const fmtD=s=>{const m=Math.floor(s/60),sc=s%60;return m===0?sc+'d':m+'m '+sc+'d';};
+const fmtT=d=>d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+const fmtDt=ds=>new Date(ds+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+/* SEED */
+function seed(){
+  if(db.records.length>0)return;
+  const CO=[['Normal'],['Padat'],['Lembek'],['Cair'],['Normal','Lembek'],['Padat'],['Normal'],['Lembek'],['Cair','Berlendir']];
+  const QT=['Normal','Sedikit','Banyak','Normal','Sedikit','Normal','Banyak','Sedikit','Normal'];
+  const CL=['Coklat','Coklat Muda','Coklat Tua','Coklat','Kuning','Coklat','Coklat','Coklat Muda','Coklat'];
+  const CD=[['Normal'],['Mules'],['Normal'],['Kembung'],['Normal'],['Sembelit'],['Diare'],['Normal'],['Perut Panas'],['Normal'],['Mules'],['Sembelit'],['Normal']];
+  const NT=['Setelah makan pedas semalam','','','','','','Cuaca sangat panas hari ini','','','','','Kurang minum air',''];
+  const now=Date.now();
+  for(let i=0;i<22;i++){
+    const day=Math.floor(Math.random()*14),tm=Math.floor(Math.random()*86400)*1000;
+    const st=now-day*86400000-tm,dur=90+Math.floor(Math.random()*660);
+    const d=new Date(st);
+    db.records.push({id:(now-i*1001).toString(),startTime:st,endTime:st+dur*1000,
+      startISO:new Date(st).toISOString(),endISO:new Date(st+dur*1000).toISOString(),
+      duration:dur,composition:CO[i%CO.length],quantity:QT[i%QT.length],color:CL[i%CL.length],
+      difficulty:Math.floor(Math.random()*9),conditions:CD[i%CD.length],notes:NT[i%NT.length],
+      date:d.toISOString().split('T')[0]});
+  }
+  db.records.sort((a,b)=>b.startTime-a.startTime);sDB();
+}
+seed();
+sesh=lSes();
+if(sesh&&!tv){tv=setInterval(tick,1000);tick();}
+const isl=document.getElementById('eval-diff');if(isl)updateSlider(isl);
+const fdl=document.getElementById('flt-diff');if(fdl)fdl.style.setProperty('--pct','100%');
+renderHome();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.getElementById('screen-stats').classList.contains('active'))renderStats();});
+window.addEventListener('resize',()=>{if(document.getElementById('screen-stats').classList.contains('active'))renderStats();});
+</script>
+</body>
+</html>
