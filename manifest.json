@@ -1,21 +1,23 @@
 {
-  "name": "DeciHelp - Decision Helper",
-  "short_name": "DeciHelp",
-  "description": "Asisten Pembantu Keputusan Anda",
-  "start_url": "./index.html",
+  "name": "Poopy Journal",
+  "short_name": "Poopy",
+  "description": "Jurnal pencatat waktu dan aktivitas BAB harian",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#F8FAFC",
-  "theme_color": "#4F46E5",
+  "background_color": "#FFF8F0",
+  "theme_color": "#FFF8F0",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "logo.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "logo.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
