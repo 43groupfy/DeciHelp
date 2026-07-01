@@ -6,7 +6,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#FFF8F0">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Poopy Journal</title>
+<title>💩 Poopy Journal</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 :root{--bg:#FFF8F0;--surface:#FFFFFF;--s2:#FFF3E8;--pr:#FF6B35;--prl:#FF8C5A;--prd:#E55A25;--sc:#4ECDC4;--scd:#3ABDB4;--ac:#FFD93D;--pu:#A855F7;--gr:#22C55E;--re:#EF4444;--tx:#2D3748;--ts:#718096;--bd:#FFE8D6;--sh:rgba(255,107,53,.12);--r:20px;--rs:12px;}
@@ -220,7 +220,7 @@ textarea.notes-area:focus{border-color:var(--pr);}
 <div id="screen-home" class="screen active">
   <div class="home-hero">
     <div class="home-greeting" id="home-greeting">Selamat pagi! ☀️</div>
-    <div class="home-title">Poopy <span>Journal</span> 💩</div>
+    <div class="home-title">💩 Poopy <span>Journal</span></div>
     <div class="mascot-wrap" onclick="goTimer()">
       <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
         <ellipse cx="60" cy="82" rx="36" ry="26" fill="#8B4513"/>
@@ -638,6 +638,17 @@ const sDB=()=>localStorage.setItem(DBK,JSON.stringify(db));
 const lSes=()=>{try{return JSON.parse(localStorage.getItem(SSK))}catch{return null}};
 const sSes=s=>s?localStorage.setItem(SSK,JSON.stringify(s)):localStorage.removeItem(SSK);
 let sStack=['home'];
+
+// ========== PERBAIKAN ZONA WAKTU ==========
+// Fungsi untuk mendapatkan tanggal YYYY-MM-DD sesuai zona waktu lokal
+function getLocalDate(timestamp) {
+  const d = timestamp ? new Date(timestamp) : new Date();
+  // Kurangi dengan offset zona waktu lokal agar saat di-ISO-kan hasilnya sama dengan lokal
+  return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+}
+const todayStr = () => getLocalDate(Date.now());
+// ==========================================
+
 function gotoScreen(n,push=true){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const e=document.getElementById('screen-'+n);if(e)e.classList.add('active');
@@ -673,7 +684,7 @@ function saveSession(){
     startISO:sesh.startISO,endISO:sesh.endISO,duration:sesh.duration,
     composition:comp.length?comp:['Normal'],quantity:qty||'Normal',color:clr||'Coklat',
     difficulty:diff,conditions:cond.length?cond:['Normal'],notes,
-    date:new Date(sesh.startTime).toISOString().split('T')[0]};
+    date:getLocalDate(sesh.startTime)}; // <--- PERBAIKAN ZONA WAKTU
   db.records.unshift(rec);sDB();sesh=null;sSes(null);
   showToast('✅ Sesi berhasil disimpan!');gotoScreen('home');
 }
@@ -898,7 +909,8 @@ function renderHistory(){
   const list=document.getElementById('history-list');if(!list)return;
   const recs=getFltRecs();
   if(!recs.length){list.innerHTML='<div class="empty-state"><div class="es-icon">🗂️</div><h3>Tidak ada catatan</h3><p>Tidak ada data yang cocok dengan filter kamu.</p></div>';return;}
-  const td=todayStr(),yd=(()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().split('T')[0];})();
+  const td=todayStr();
+  const yd=getLocalDate(Date.now() - 86400000); // <--- PERBAIKAN ZONA WAKTU
   const grp={};recs.forEach(r=>(grp[r.date]=grp[r.date]||[]).push(r));
   list.innerHTML=Object.entries(grp).sort((a,b)=>b[0].localeCompare(a[0])).map(([date,rs])=>{
     const lbl=date===td?'Hari Ini 📅':date===yd?'Kemarin':fmtDt(date);
@@ -1016,7 +1028,6 @@ function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function showToast(msg,ms=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),ms);}
 /* FORMATTERS */
-const todayStr=()=>new Date().toISOString().split('T')[0];
 const fmtD=s=>{const m=Math.floor(s/60),sc=s%60;return m===0?sc+'d':m+'m '+sc+'d';};
 const fmtT=d=>d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
 const fmtDt=ds=>new Date(ds+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
@@ -1037,7 +1048,7 @@ function seed(){
       startISO:new Date(st).toISOString(),endISO:new Date(st+dur*1000).toISOString(),
       duration:dur,composition:CO[i%CO.length],quantity:QT[i%QT.length],color:CL[i%CL.length],
       difficulty:Math.floor(Math.random()*9),conditions:CD[i%CD.length],notes:NT[i%NT.length],
-      date:d.toISOString().split('T')[0]});
+      date:getLocalDate(st)}); // <--- PERBAIKAN ZONA WAKTU
   }
   db.records.sort((a,b)=>b.startTime-a.startTime);sDB();
 }
@@ -1108,7 +1119,7 @@ function exportData() {
   // Buat link download otomatis
   const a = document.createElement('a');
   a.href = url;
-  a.download = `poopy_journal_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `poopy_journal_backup_${getLocalDate(Date.now())}.json`; // <--- PERBAIKAN ZONA WAKTU
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
