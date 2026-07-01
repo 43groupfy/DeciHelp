@@ -6,7 +6,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#FFF8F0">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>💩 Poopy Journal</title>
+<title>Poopy Journal</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 :root{--bg:#FFF8F0;--surface:#FFFFFF;--s2:#FFF3E8;--pr:#FF6B35;--prl:#FF8C5A;--prd:#E55A25;--sc:#4ECDC4;--scd:#3ABDB4;--ac:#FFD93D;--pu:#A855F7;--gr:#22C55E;--re:#EF4444;--tx:#2D3748;--ts:#718096;--bd:#FFE8D6;--sh:rgba(255,107,53,.12);--r:20px;--rs:12px;}
@@ -652,49 +652,6 @@ function gotoScreen(n,push=true){
 }
 function goBack(){sStack.pop();gotoScreen(sStack[sStack.length-1]||'home',false);}
 
-
-function startSession(){
-  if(sesh){gotoScreen('timer');return;}
-  
-  showConfirm(
-    'Mulai Sesi? 🚀', 
-    'Siap untuk mencatat sesi BAB kamu sekarang?', 
-    '🚽', 
-    'Gas!', 
-    'btn-primary', 
-    () => {
-      sesh={startTime:Date.now(),startISO:new Date().toISOString()};
-      sSes(sesh);
-      gotoScreen('timer');
-    }
-  );
-}
-
-function finishSession(){
-  if(!sesh){gotoScreen('home');return;}
-  
-  showConfirm(
-    'Selesai BAB? 🎉', 
-    'Yakin sesi ini sudah selesai? Waktu akan dihentikan.', 
-    '✨', 
-    'Selesai', 
-    'btn-secondary', 
-    () => {
-      if(tv){clearInterval(tv);tv=null;}
-      sesh.endTime=Date.now();sesh.endISO=new Date().toISOString();
-      sesh.duration=Math.floor((sesh.endTime-sesh.startTime)/1000);
-      sSes(sesh);
-      document.querySelectorAll('#screen-eval .chip').forEach(c=>c.classList.remove('selected'));
-      document.querySelectorAll('#screen-eval .color-chip').forEach(c=>c.classList.remove('selected'));
-      const sl=document.getElementById('eval-diff');if(sl){sl.value=3;updateSlider(sl);}
-      const na=document.getElementById('eval-notes');if(na)na.value='';
-      const badge=document.getElementById('eval-dur-badge');if(badge)badge.textContent='⏱️ '+fmtD(sesh.duration);
-      gotoScreen('eval');
-    }
-  );
-}
-
-
 function goTimer(){sesh=lSes();sesh?gotoScreen('timer'):startSession();}
 function startTR(){sesh=lSes();if(!sesh)return;if(tv)clearInterval(tv);tick();tv=setInterval(tick,1000);}
 function tick(){
@@ -1226,6 +1183,110 @@ function resetAllData() {
       showToast('✅ Data telah dibersihkan!');
       gotoScreen('home'); // Kembali ke home
       location.reload(); // Refresh halaman untuk memastikan state bersih total
+    }
+  );
+}
+
+</script>
+
+<script>
+/* --- NOTIFICATIONS API HELPER --- */
+
+async function showAppNotification(title, options) {
+  // Cek apakah browser mendukung Notifications API dan Service Worker
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+    console.warn('Browser tidak mendukung Web Notifications API.');
+    return;
+  }
+
+  // Minta izin hanya saat fungsi ini dipanggil pertama kali (misal: saat klik Start)
+  if (Notification.permission === 'default') {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      showToast('⚠️ Izin notifikasi ditolak.');
+      return;
+    }
+  }
+
+  if (Notification.permission === 'granted') {
+    navigator.serviceWorker.ready.then(registration => {
+      // Munculkan notifikasi menggunakan Service Worker Registration
+      registration.showNotification(title, {
+        icon: 'icon-192.png', // Ikon PWA kamu
+        badge: 'icon-192.png',
+        ...options
+      });
+    });
+  }
+}
+
+// Mendengarkan pesan dari Service Worker (saat notifikasi diklik)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data && event.data.action === 'openTimerScreen') {
+      // Pastikan ada sesi aktif sebelum memaksa buka layar timer
+      if(sesh) {
+        gotoScreen('timer');
+      } else {
+        gotoScreen('home');
+      }
+    }
+  });
+}
+
+function startSession(){
+  if(sesh){gotoScreen('timer');return;}
+  
+  showConfirm(
+    'Mulai Sesi? 🚀', 
+    'Siap untuk mencatat sesi BAB kamu sekarang?', 
+    '🚽', 
+    'Gas!', 
+    'btn-primary', 
+    () => {
+      sesh={startTime:Date.now(),startISO:new Date().toISOString()};
+      sSes(sesh);
+      
+      // Panggil Notifikasi saat timer dimulai
+      showAppNotification('⏱️ Timer sedang berjalan', {
+        body: 'Ketuk untuk kembali ke aplikasi. Jangan lupa tekan Selesai setelah aktivitas selesai.',
+        tag: 'active-timer',
+        requireInteraction: true // Notifikasi tetap standby di layar (jika didukung OS)
+      });
+
+      gotoScreen('timer');
+    }
+  );
+}
+
+function finishSession(){
+  if(!sesh){gotoScreen('home');return;}
+  
+  showConfirm(
+    'Selesai BAB? 🎉', 
+    'Yakin sesi ini sudah selesai? Waktu akan dihentikan.', 
+    '✨', 
+    'Selesai', 
+    'btn-secondary', 
+    () => {
+      if(tv){clearInterval(tv);tv=null;}
+      sesh.endTime=Date.now();sesh.endISO=new Date().toISOString();
+      sesh.duration=Math.floor((sesh.endTime-sesh.startTime)/1000);
+      sSes(sesh);
+      
+      // Timpa notifikasi 'active-timer' sebelumnya
+      showAppNotification('✅ Timer selesai', {
+        body: 'Silakan isi evaluasi aktivitas Anda.',
+        tag: 'active-timer', // Menggunakan tag yang sama akan otomatis menutup notifikasi lama
+        requireInteraction: false // Bisa otomatis hilang
+      });
+
+      document.querySelectorAll('#screen-eval .chip').forEach(c=>c.classList.remove('selected'));
+      document.querySelectorAll('#screen-eval .color-chip').forEach(c=>c.classList.remove('selected'));
+      const sl=document.getElementById('eval-diff');if(sl){sl.value=3;updateSlider(sl);}
+      const na=document.getElementById('eval-notes');if(na)na.value='';
+      const badge=document.getElementById('eval-dur-badge');if(badge)badge.textContent='⏱️ '+fmtD(sesh.duration);
+      gotoScreen('eval');
     }
   );
 }
