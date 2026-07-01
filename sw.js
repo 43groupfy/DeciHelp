@@ -1,4 +1,4 @@
-const CACHE_NAME = 'poopy-cache-v1.1';
+const CACHE_NAME = 'poopy-cache-v1.2';
 const urlsToCache = [
   './',
   './poopy-journal.html', // GANTI dengan nama file HTML-mu sebenarnya (misal: index.html)
