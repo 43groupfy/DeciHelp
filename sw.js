@@ -1,7 +1,7 @@
-const CACHE_NAME = 'poopy-cache-v1';
+const CACHE_NAME = 'poopy-cache-v1.2';
 const urlsToCache = [
   './',
-  './poopy-journal.html', // GANTI dengan nama file HTML-mu sebenarnya (misal: index.html)
+  './index.html', // GANTI dengan nama file HTML-mu sebenarnya (misal: index.html)
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap'
 ];
