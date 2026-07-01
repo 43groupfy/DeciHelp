@@ -21,9 +21,9 @@ html,body{height:100%;font-family:'Nunito',sans-serif;background:var(--bg);color
 .nav-btn.active{color:var(--pr);}
 .nav-btn svg{width:24px;height:24px;transition:transform .2s;}
 .nav-btn.active svg{transform:scale(1.15);}
-.page-header{padding:52px 20px 12px;display:flex;align-items:center;gap:12px;}
+.page-header{padding:22px 20px 18px;display:flex;align-items:center;gap:12px;}
 .page-header h1{font-size:24px;font-weight:900;}
-.card{background:var(--surface);border-radius:var(--r);padding:18px 16px;margin:0 14px 12px;box-shadow:0 2px 12px var(--sh);border:2px solid var(--bd);}
+.card{background:var(--surface);border-radius:var(--r);padding:18px 16px;margin: 0 14px 12px;box-shadow:0 2px 12px var(--sh);border:2px solid var(--bd);}
 .card-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
 .btn{border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn:active{transform:scale(.96);}
@@ -131,7 +131,7 @@ textarea.notes-area:focus{border-color:var(--pr);}
 .search-wrap{padding:0 14px 10px;position:relative;}
 .search-input{width:100%;border:2px solid var(--bd);border-radius:var(--rs);padding:10px 14px 10px 38px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;color:var(--tx);background:var(--surface);outline:none;transition:border-color .2s;}
 .search-input:focus{border-color:var(--pr);}
-.search-icon{position:absolute;left:24px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;}
+.search-icon{position:absolute;left:24px;top:40%;transform:translateY(-50%);font-size:16px;pointer-events:none;}
 .adv-toggle-btn{flex-shrink:0;width:38px;height:38px;border-radius:var(--rs);font-family:'Nunito',sans-serif;font-size:15px;cursor:pointer;border:2px solid var(--bd);background:var(--surface);color:var(--ts);display:flex;align-items:center;justify-content:center;gap:0;position:relative;transition:all .15s;}
 .adv-toggle-btn.open{border-color:var(--pr);color:var(--pr);background:var(--s2);}
 .adv-filter-section{margin-bottom:14px;}
@@ -209,6 +209,9 @@ textarea.notes-area:focus{border-color:var(--pr);}
 .confirm-actions { display: flex; gap: 12px; }
 .confirm-actions .btn { flex: 1; padding: 14px; font-size: 15px; border-radius: 16px; }
 
+/* Tambahan Icon */
+.arrow-icon{ position: relative; top: 2px;}
+.filter-icon{ position: relative; top: 4px;}
 </style>
 </head>
 <body>
@@ -325,7 +328,7 @@ textarea.notes-area:focus{border-color:var(--pr);}
   <div class="timer-display"><span id="t-mm">00</span>:<span id="t-ss">00</span></div>
   <div class="timer-start-info" id="t-start-info">Mulai: —</div>
     <div class="finish-btn-wrap" style="display: flex; flex-direction: column; gap: 12px;">
-    <button class="btn btn-secondary" onclick="finishSession()">✅ Finish</button>
+    <button class="btn btn-secondary" onclick="finishSession()">Finish</button>
     
     <!-- Tombol Tutup Baru -->
     <button class="btn btn-close" style="width: 100%; border: none;" onclick="gotoScreen('home')">
@@ -419,7 +422,10 @@ textarea.notes-area:focus{border-color:var(--pr);}
     <div class="stats-tab" onclick="setStatsPd(90,this)">3 Bulan</div>
   </div>
   <div class="period-card" onclick="showPdDetail()">
-    <div class="pc-header"><div class="pc-title" id="pc-title">📅 Last 7 Days</div><div style="color:var(--ts)">Detail ›</div></div>
+    <div class="pc-header"><div class="pc-title" id="pc-title">📅 Last 7 Days</div><div style="color:var(--ts)">Detail <svg class="arrow-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M9 18l6-6-6-6"/>
+</svg>
+</div></div>
     <div class="pc-stats">
       <div class="pc-stat"><div class="pv" id="pc-cnt">—</div><div class="pl">Poop Count</div></div>
       <div class="pc-stat"><div class="pv" id="pc-avg">—</div><div class="pl">Avg Duration</div></div>
@@ -468,8 +474,10 @@ textarea.notes-area:focus{border-color:var(--pr);}
       <div class="filter-pill" data-f="month" onclick="setHistFlt('month',this)">Bulan Ini</div>
       <div class="filter-pill" data-f="year" onclick="setHistFlt('year',this)">Tahun Ini</div>
     </div>
-    <button class="adv-toggle-btn" id="adv-btn" onclick="openAdvModal()">
-      <span>⚙️</span>
+    <button style="background:var(--pr);color:#fff;" class="adv-toggle-btn" id="adv-btn" onclick="openAdvModal()">
+      <span><svg width="20" height="20" class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+</svg></span>
       <span id="adv-cnt" style="display:none;position:absolute;top:-5px;right:-5px;background:var(--pr);color:#fff;border-radius:9px;min-width:16px;height:16px;font-size:10px;line-height:16px;text-align:center;font-weight:800;padding:0 3px">0</span>
     </button>
   </div>
@@ -571,7 +579,10 @@ textarea.notes-area:focus{border-color:var(--pr);}
 <div class="modal-overlay" id="modal-adv" onclick="closeModal('modal-adv')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
-    <h3>⚙️ Filter Lanjutan</h3>
+
+    <h3><svg width="20" height="20" class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+</svg> Filter Lanjutan</h3>
     <div class="adv-filter-section">
       <div class="adv-filter-label">Komposisi</div>
       <div class="chip-group" id="flt-comp">
@@ -935,7 +946,10 @@ function renderHistory(){
   list.innerHTML=Object.entries(grp).sort((a,b)=>b[0].localeCompare(a[0])).map(([date,rs])=>{
     const lbl=date===td?'Hari Ini 📅':date===yd?'Kemarin':fmtDt(date);
     const items=rs.map(r=>{const hex=CHEX[r.color]||'#8B4513';
-      return`<div class="history-item" onclick="openDetail('${r.id}')"><div class="hi-dot" style="background:${hex}22">💩</div><div class="hi-info"><div class="hi-time">${fmtT(new Date(r.startTime))}</div><div class="hi-dur">${fmtD(r.duration)} · ${r.quantity}</div><div class="hi-tags">${r.composition.slice(0,2).map(c=>`<span class="hi-tag">${c}</span>`).join('')}${r.conditions.slice(0,2).map(c=>`<span class="hi-tag cond">${c}</span>`).join('')}</div></div><div class="hi-arrow">›</div></div>`;
+      return`<div class="history-item" onclick="openDetail('${r.id}')"><div class="hi-dot" style="background:${hex}22">💩</div><div class="hi-info"><div class="hi-time">${fmtT(new Date(r.startTime))}</div><div class="hi-dur">${fmtD(r.duration)} · ${r.quantity}</div><div class="hi-tags">${r.composition.slice(0,2).map(c=>`<span class="hi-tag">${c}</span>`).join('')}${r.conditions.slice(0,2).map(c=>`<span class="hi-tag cond">${c}</span>`).join('')}</div></div><div class="hi-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M9 18l6-6-6-6"/>
+</svg>
+</div></div>`;
     }).join('');
     return`<div class="history-date-group"><div class="history-date-label">${lbl}</div>${items}</div>`;
   }).join('');
@@ -1163,12 +1177,24 @@ function importData(event) {
           '⚠️', 
           'Ya, Import', 
           'btn-danger', 
+                  
           () => {
-            db = imported;
-            sDB(); // Simpan ke local storage
-            showToast('✅ Data berhasil diimport!');
-            gotoScreen('home'); // Kembali ke home untuk refresh tampilan
-          }
+  // Menggabungkan array records lama dan baru
+  const combinedRecords = [...db.records, ...imported.records];
+  
+  // Menghapus duplikasi berdasarkan ID
+  const uniqueRecords = Array.from(new Map(combinedRecords.map(r => [r.id, r])).values());
+  
+  // Mengurutkan kembali berdasarkan waktu terbaru
+  uniqueRecords.sort((a, b) => b.startTime - a.startTime);
+  
+  db.records = uniqueRecords;
+  sDB(); 
+  showToast('✅ Data berhasil digabungkan!');
+  gotoScreen('home');
+}
+
+          
         );
       } else {
         showToast('❌ Format file tidak valid!');
