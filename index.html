@@ -1037,7 +1037,7 @@ function seed(){
   }
   db.records.sort((a,b)=>b.startTime-a.startTime);sDB();
 }
-seed();
+//seed();
 sesh=lSes();
 if(sesh&&!tv){tv=setInterval(tick,1000);tick();}
 const isl=document.getElementById('eval-diff');if(isl)updateSlider(isl);
